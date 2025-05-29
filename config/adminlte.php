@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'title' => 'AdminLTE 3',
+    'title' => 'AdminViv',
     'title_prefix' => '',
     'title_postfix' => '',
 
@@ -63,8 +63,8 @@ return [
     |
     */
 
-    'logo' => '<b>Admin</b>LTE',
-    'logo_img' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
+    'logo' => '<b>Viv</b>ADMIN',
+    'logo_img' => 'storage/images/logo_abreviado.png',
     'logo_img_class' => 'brand-image img-circle elevation-3',
     'logo_img_xl' => null,
     'logo_img_xl_class' => 'brand-image-xs',
@@ -86,7 +86,7 @@ return [
     'auth_logo' => [
         'enabled' => false,
         'img' => [
-            'path' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
+            'path' => 'storage/images/logo_abreviado.png',
             'alt' => 'Auth Logo',
             'class' => '',
             'width' => 50,
@@ -113,7 +113,7 @@ return [
         'enabled' => true,
         'mode' => 'fullscreen',
         'img' => [
-            'path' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
+            'path' => 'storage/images/logo_abreviado.png',
             'alt' => 'AdminLTE Preloader Image',
             'effect' => 'animation__shake',
             'width' => 60,
@@ -260,7 +260,7 @@ return [
     'dashboard_url' => 'home',
     'logout_url' => 'logout',
     'login_url' => 'login',
-    'register_url' => 'register',
+    //'register_url' => 'register',
     'password_reset_url' => 'password/reset',
     'password_email_url' => 'password/email',
     'profile_url' => false,
@@ -301,39 +301,53 @@ return [
     'menu' => [
         // Navbar items:
         [
-            'type' => 'navbar-search',
-            'text' => 'search',
-            'topnav_right' => true,
-        ],
-        [
             'type' => 'fullscreen-widget',
             'topnav_right' => true,
         ],
 
         // Sidebar items:
         [
-            'type' => 'sidebar-menu-search',
-            'text' => 'search',
+            'text' => 'Dashboard',
+            'url' => 'admin/dashboard',
+            'icon' => 'fas fa-chart-line',
         ],
         [
             'text' => 'blog',
             'url' => 'admin/blog',
-            'can' => 'manage-blog',
+            //'can' => 'manage-blog',
+            'icon' => 'fas fa-newspaper',
         ],
         [
-            'text' => 'pages',
-            'url' => 'admin/pages',
-            'icon' => 'far fa-fw fa-file',
-            'label' => 4,
-            'label_color' => 'success',
+            'text' => 'Gerenciar Tecidos',
+            'url' => 'admin/tecidos',
+            'icon' => 'fas fa-tshirt',
         ],
+        [
+            'text' => 'Gerenciar Clientes',
+            'url' => 'admin/clientes',
+            'icon' => 'fas fa-users',
+            //'can'  => 'admin',
+        ],
+        [
+            'text' => 'Gerenciar Pedidos',
+            'url' => 'admin/pedidos',
+            'icon' => 'fas fa-list',
+        ],
+        /*[
+             'text' => 'pages',
+             'url' => 'admin/pages',
+             'icon' => 'far fa-fw fa-file',
+             //'label' => 4,
+             //'label_color' => 'success',
+         ],*/
         ['header' => 'account_settings'],
         [
-            'text' => 'profile',
-            'url' => 'admin/settings',
-            'icon' => 'fas fa-fw fa-user',
+            'text' => 'Meu Perfil',
+            'url' => 'admin/perfil',
+            'icon' => 'fas fa-user',
+            //'can' => ['admin', 'gerente'], // Apenas para administradores e gerentes
         ],
-        [
+        /*[
             'text' => 'change_password',
             'url' => 'admin/settings',
             'icon' => 'fas fa-fw fa-lock',
@@ -375,23 +389,7 @@ return [
                     'url' => '#',
                 ],
             ],
-        ],
-        ['header' => 'labels'],
-        [
-            'text' => 'important',
-            'icon_color' => 'red',
-            'url' => '#',
-        ],
-        [
-            'text' => 'warning',
-            'icon_color' => 'yellow',
-            'url' => '#',
-        ],
-        [
-            'text' => 'information',
-            'icon_color' => 'cyan',
-            'url' => '#',
-        ],
+        ],*/
     ],
 
     /*
