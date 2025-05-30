@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/login');
 
-Auth::routes();
+Auth::routes(['register' => false]);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
@@ -19,6 +19,23 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth']], 
 
     Route::resource('/blog', \App\Http\Controllers\BlogController::class)
         ->names('blog');
+
+    Route::resource('pedidos', \App\Http\Controllers\PedidoController::class)
+        ->except(['create', 'store'])
+        ->names('pedidos');
+
+    Route::get('pedidos/filtrar/{status}', [\App\Http\Controllers\PedidoController::class, 'filtrarPorStatus'])
+        ->name('pedidos.filtrar');
+
+    Route::get('pedidos/{pedido}/pagamentos', [\App\Http\Controllers\PedidoController::class, 'pagamentos'])
+        ->name('pedidos.pagamentos');
+
+    Route::put('pagamentos/{pagamento}', [\App\Http\Controllers\PedidoController::class, 'atualizarPagamento'])
+        ->name('pagamentos.update');
+
+    Route::post('pagamentos/{pagamento}/reembolsar', [\App\Http\Controllers\PedidoController::class, 'solicitarReembolso'])
+        ->name('pagamentos.reembolsar');
+
 
     // Rotas de perfil
     Route::get('perfil', [\App\Http\Controllers\PerfilController::class, 'perfil'])->name('perfil');

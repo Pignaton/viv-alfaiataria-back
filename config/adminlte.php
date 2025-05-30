@@ -86,7 +86,7 @@ return [
     'auth_logo' => [
         'enabled' => false,
         'img' => [
-            'path' => 'storage/images/logo_abreviado.png',
+            'path' => 'storage/images/logo_abreviado.png?v=2',
             'alt' => 'Auth Logo',
             'class' => '',
             'width' => 50,
@@ -260,7 +260,7 @@ return [
     'dashboard_url' => 'home',
     'logout_url' => 'logout',
     'login_url' => 'login',
-    //'register_url' => 'register',
+    'register_url' => null,
     'password_reset_url' => 'password/reset',
     'password_email_url' => 'password/email',
     'profile_url' => false,
@@ -328,11 +328,15 @@ return [
             'icon' => 'fas fa-users',
             //'can'  => 'admin',
         ],
+
         [
-            'text' => 'Gerenciar Pedidos',
+            'text' => 'Pedidos',
             'url' => 'admin/pedidos',
-            'icon' => 'fas fa-list',
+            'icon' => 'fas fa-shopping-cart',
+            //'can' => ['admin', 'gerente'],
         ],
+
+
         /*[
              'text' => 'pages',
              'url' => 'admin/pages',
@@ -345,7 +349,7 @@ return [
             'text' => 'Meu Perfil',
             'url' => 'admin/perfil',
             'icon' => 'fas fa-user',
-            //'can' => ['admin', 'gerente'], // Apenas para administradores e gerentes
+           // 'can' => ['admin', 'gerente'],
         ],
         /*[
             'text' => 'change_password',

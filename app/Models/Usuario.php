@@ -10,6 +10,8 @@ class Usuario extends Authenticatable
 {
     use HasFactory;
 
+    use Notifiable;
+
     protected $table = 'usuario';
     protected $primaryKey = 'id';
 
