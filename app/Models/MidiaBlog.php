@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class MidiaBlog extends Model
 {
     use HasFactory;
+    public $timestamps = false;
 
     protected $table = 'midia_blog';
     protected $primaryKey = 'id';

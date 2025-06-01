@@ -3,6 +3,9 @@
 @section('title', 'Gerenciar Cliente')
 
 @section('content_header')
+    <h1 class="m-0 text-dark">
+        <small>Gerenciar Clientes</small>
+    </h1>
 @stop
 
 @section('content')

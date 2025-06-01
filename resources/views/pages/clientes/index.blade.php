@@ -38,6 +38,7 @@
                 </tr>
                 </thead>
                 <tbody>
+
                 @foreach($clientes as $usuario)
                     <tr>
                         <td>{{ $usuario->id }}</td>
@@ -53,19 +54,30 @@
                             @endif
                         </td>
                         <td>
+
                             <a href="{{ route('admin.clientes.show', $usuario->id) }}" class="btn btn-sm btn-info">
                                 <i class="fas fa-eye"></i>
                             </a>
                             <a href="{{ route('admin.clientes.edit', $usuario->id) }}" class="btn btn-sm btn-primary">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <form action="{{ route('admin.clientes.destroy', $usuario->id) }}" method="POST" style="display:inline">
+                            <form action="{{ route('admin.clientes.destroy', $usuario->id) }}" method="POST"
+                                  style="display:inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja excluir este cliente?')">
+                                <button type="submit" class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Tem certeza que deseja excluir este cliente?')">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
+                        </td>
+                        <td>
+                            {{ $usuario->cliente->enderecos->count() }}
+                            @if($usuario->cliente->enderecos->where('principal', true)->first())
+                                <span class="badge badge-primary" title="Endereço principal">
+                                    <i class="fas fa-home"></i>
+                                </span>
+                            @endif
                         </td>
                     </tr>
                 @endforeach

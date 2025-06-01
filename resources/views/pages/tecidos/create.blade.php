@@ -33,7 +33,7 @@
                         <label for="nome_produto">Nome do Produto *</label>
                         <input type="text" name="nome_produto" id="nome_produto"
                                class="form-control @error('nome_produto') is-invalid @enderror"
-                               value="{{ old('nome_produto') }}" required maxlength="20">
+                               value="{{ old('nome_produto') }}" required maxlength="50">
                         @error('nome_produto')
                         <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>

@@ -12,6 +12,12 @@ class Usuario extends Authenticatable
 
     use Notifiable;
 
+    public $timestamps = false;
+
+    const CREATED_AT = 'data_criacao';
+
+    const UPDATED_AT = null;
+
     protected $table = 'usuario';
     protected $primaryKey = 'id';
 
@@ -72,4 +78,9 @@ class Usuario extends Authenticatable
         }
         return 'cliente';
     }
+    public function enderecos()
+    {
+        return $this->hasMany(Endereco::class, 'usuario_id');
+    }
+
 }
