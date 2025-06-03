@@ -82,7 +82,7 @@
                                 </tr>
                                 <tr>
                                     <th>Cadastrado em:</th>
-                                    <td>{{ $tecido->created_at->format('d/m/Y H:i') }}</td>
+                                    <td>{{ $tecido->data_cadastro->format('d/m/Y H:i') }}</td>
                                 </tr>
                             </table>
                         </div>

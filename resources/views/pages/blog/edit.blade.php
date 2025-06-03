@@ -16,7 +16,7 @@
         <div class="card-header">
             <h3 class="card-title">Editar Post</h3>
             <div class="card-tools">
-                <a href="{{ route('admin.blog.show', $post->id) }}" class="btn btn-default btn-sm">
+                <a href="{{ route('admin.blog.show',  ['id' => $post->id]) }}" class="btn btn-default btn-sm">
                     <i class="fas fa-arrow-left"></i> Voltar
                 </a>
             </div>
@@ -191,12 +191,11 @@
                                 <label class="custom-control-label" for="publicado">Publicar</label>
                             </div>
                         </div>
-
                         <div class="form-group" id="data_publicacao_group">
                             <label for="data_publicacao">Data de Publicação</label>
                             <input type="datetime-local" name="data_publicacao" id="data_publicacao"
                                    class="form-control @error('data_publicacao') is-invalid @enderror"
-                                   value="{{ old('data_publicacao'), $post->data_publicacao }}">
+                                   value="{{ old('data_publicacao'), $post->data_criacao->format('d/m/Y H:i')}}">
                             @error('data_publicacao')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>

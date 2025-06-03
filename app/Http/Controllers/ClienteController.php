@@ -57,9 +57,10 @@ class ClienteController extends Controller
 
     public function show($id)
     {
-        $cliente = Usuario::with('cliente')
+        $cliente = Usuario::with(['cliente', 'enderecos'])
             ->where('tipo_usuario', 'cliente')
             ->findOrFail($id);
+
 
         return view('pages.clientes.show', compact('cliente'));
     }
@@ -120,4 +121,5 @@ class ClienteController extends Controller
         return redirect()->route('admin.clientes.index')
             ->with('success', 'Cliente removido com sucesso!');
     }
+
 }

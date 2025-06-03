@@ -10,6 +10,12 @@ class PostBlog extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
+    const CREATED_AT = 'data_criacao';
+
+    const UPDATED_AT = 'data_atualizacao';
+
     protected $table = 'post_blog';
     protected $primaryKey = 'id';
 
@@ -47,7 +53,10 @@ class PostBlog extends Model
 
     public function usuario()
     {
-        return $this->belongsTo(Usuario::class, 'usuario_id');
+        return $this->belongsTo(Usuario::class, 'usuario_id')->withDefault([
+            'nome' => 'Usuário desconhecido'
+        ]);
+       //return $this->belongsTo(Usuario::class, 'usuario_id');
     }
 
     public function midias()

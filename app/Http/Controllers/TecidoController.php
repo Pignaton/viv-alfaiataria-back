@@ -31,7 +31,7 @@ class TecidoController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nome_produto' => 'required|string|max:20|unique:tecidos',
+            'nome_produto' => 'required|string|max:50|unique:tecido',
             'composicao' => 'required|string|max:50',
             'padrao' => 'required|string|max:100',
             'suavidade' => 'required|string|max:20',

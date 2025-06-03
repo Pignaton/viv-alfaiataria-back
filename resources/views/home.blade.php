@@ -8,6 +8,7 @@
 
 @section('content')
     <p>Welcome to this beautiful admin panel.</p>
+    {{ Auth::user()->nome }}
 @stop
 
 @section('css')

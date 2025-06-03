@@ -93,16 +93,18 @@ class BlogController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(PostBlog $post)
+    public function show($id)
     {
-        $post->load(['usuario', 'midias']);
-        return view('admin.blog.show', compact('post'));
+        $post = PostBlog::with(['usuario', 'midias'])->findOrFail($id);
+        //$post->load(['usuario', 'midias']);
+
+        return view('pages.blog.show', compact('post'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(PostBlog $post)
+    public function edit($id)
     {
         $tiposConteudo = [
             'padrao' => 'Padrão',
@@ -110,7 +112,8 @@ class BlogController extends Controller
             'galeria' => 'Galeria'
         ];
 
-        $post->load('midias');
+        $post = PostBlog::with(['usuario', 'midias'])->findOrFail($id);
+        //$post->load(['usuario', 'midias']);
         return view('pages.blog.edit', compact('post', 'tiposConteudo'));
     }
 
@@ -168,7 +171,7 @@ class BlogController extends Controller
             ]);
         }
 
-        // Upload de novas mídias
+        // novas mídias
         if ($request->hasFile('midias')) {
             $ultimaOrdem = $post->midias()->max('ordem') ?? 0;
 
