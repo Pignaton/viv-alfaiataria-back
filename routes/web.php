@@ -57,8 +57,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth']], 
     Route::post('perfil/alterar-senha', [\App\Http\Controllers\PerfilController::class, 'alterarSenha'])->name('perfil.alterar-senha');
     Route::delete('perfil/revogar-sessao/{token}', [\App\Http\Controllers\PerfilController::class, 'revogarSessao'])->name('perfil.revogar-sessao');
 
-    Route::post('enderecos', [EnderecoController::class, 'store'])->name('enderecos.store');
-    Route::delete('enderecos/{endereco}', [EnderecoController::class, 'destroy'])->name('enderecos.destroy');
+    Route::post('enderecos', [\App\Http\Controllers\EnderecoController::class, 'store'])->name('enderecos.store');
+    Route::delete('enderecos/{endereco}', [\App\Http\Controllers\EnderecoController::class, 'destroy'])->name('enderecos.destroy');
 
     // API para busca de CEP
     Route::get('api/buscar-cep', [\App\Http\Controllers\EnderecoController::class, 'buscarCep'])
