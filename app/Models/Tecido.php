@@ -58,7 +58,7 @@ class Tecido extends Model
      */
     protected $attributes = [
         'preco_promocional' => 0,
-        'imagem_url' => '/images/default-fabric.jpg'
+        'imagem_url' => '/storage/images/default-fabric.jpg'
     ];
 
     /**
@@ -112,7 +112,7 @@ class Tecido extends Model
      */
     public function deleteImagem()
     {
-        if ($this->imagem_url && $this->imagem_url !== '/images/default-fabric.jpg') {
+        if ($this->imagem_url && $this->imagem_url !== '/storage/images/default-fabric.jpg') {
             Storage::delete(str_replace('/storage', 'public', $this->imagem_url));
         }
     }

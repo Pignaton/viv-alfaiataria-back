@@ -42,12 +42,13 @@ class TecidoController extends Controller
             'peso' => 'required|string|max:50',
             'preco' => 'required|numeric|min:0',
             'preco_promocional' => 'nullable|numeric|min:0',
-            'imagem' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'imagem' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         if ($request->hasFile('imagem')) {
-            $path = $request->file('imagem')->store('public/tecidos');
-            $validated['imagem_url'] = Storage::url($path);
+            $validated['imagem_url'] = uploadToR2($request->file('imagem'), 'tecidos');
+        } else {
+            $validated['imagem_url'] = 'https://api.vivalfaiataria.com.br/storage/images/default-fabric.jpg';
         }
 
         Tecido::create($validated);
@@ -78,7 +79,7 @@ class TecidoController extends Controller
     public function update(Request $request, Tecido $tecido)
     {
         $validated = $request->validate([
-            'nome_produto' => 'required|string|max:20|unique:tecidos,nome_produto,' . $tecido->id,
+            'nome_produto' => 'required|string|max:50|unique:tecido,nome_produto,' . $tecido->id,
             'composicao' => 'required|string|max:50',
             'padrao' => 'required|string|max:100',
             'suavidade' => 'required|string|max:20',
@@ -89,18 +90,16 @@ class TecidoController extends Controller
             'peso' => 'required|string|max:50',
             'preco' => 'required|numeric|min:0',
             'preco_promocional' => 'nullable|numeric|min:0',
-            'imagem' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'imagem' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        // Upload da nova imagem se for fornecida
         if ($request->hasFile('imagem')) {
-            // Remove a imagem antiga se não for a padrão
-            if ($tecido->imagem_url !== '/images/default-fabric.jpg') {
-                Storage::delete(str_replace('/storage', 'public', $tecido->imagem_url));
+            // Remove a imagem antiga caso não seja apadrão
+            if (!str_contains($tecido->imagem_url, 'default-fabric.jpg')) {
+                deleteFromR2($tecido->imagem_url);
             }
 
-            $path = $request->file('imagem')->store('public/tecidos');
-            $validated['imagem_url'] = Storage::url($path);
+            $validated['imagem_url'] = uploadToR2($request->file('imagem'), 'tecidos');
         }
 
         $tecido->update($validated);
@@ -114,9 +113,8 @@ class TecidoController extends Controller
      */
     public function destroy(Tecido $tecido)
     {
-        // Remove a imagem se não for a padrão
-        if ($tecido->imagem_url !== '/images/default-fabric.jpg') {
-            Storage::delete(str_replace('/storage', 'public', $tecido->imagem_url));
+        if (!str_contains($tecido->imagem_url, 'default-fabric.jpg')) {
+            deleteFromR2($tecido->imagem_url);
         }
 
         $tecido->delete();
