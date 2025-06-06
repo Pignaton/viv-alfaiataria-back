@@ -138,4 +138,9 @@ class Tecido extends Model
         return $query->where('nome_produto', 'LIKE', "%{$termo}%")
             ->orWhere('composicao', 'LIKE', "%{$termo}%");
     }
+
+    public function imagens()
+    {
+        return $this->hasMany(TecidoImagem::class, 'tecido_id');
+    }
 }

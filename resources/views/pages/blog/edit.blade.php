@@ -23,6 +23,17 @@
         </div>
 
         <div class="card-body">
+
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $erro)
+                            <li>{{ $erro }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <form action="{{ route('admin.blog.update', $post->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
@@ -195,7 +206,7 @@
                             <label for="data_publicacao">Data de Publicação</label>
                             <input type="datetime-local" name="data_publicacao" id="data_publicacao"
                                    class="form-control @error('data_publicacao') is-invalid @enderror"
-                                   value="{{ old('data_publicacao'), $post->data_criacao->format('d/m/Y H:i')}}">
+                                   value="{{ old('data_publicacao', $post->data_publicacao ? $post->data_criacao->format('Y-m-d\TH:i'): '')}}">
                             @error('data_publicacao')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>
@@ -225,5 +236,9 @@
         $('#publicado').change(function () {
             $('#data_publicacao_group').toggle(this.checked);
         }).trigger('change');
+
+        $('.summernote').summernote({
+            height: 300
+        });
     </script>
 @endsection

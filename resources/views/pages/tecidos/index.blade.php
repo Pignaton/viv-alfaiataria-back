@@ -27,7 +27,7 @@
                 </div>
             @endif
 
-            <table class="table table-bordered table-hover">
+            <table class="table table-responsive table-bordered table-hover" style="width: 100%">
                 <thead class="thead-dark">
                 <tr>
                     <th>Imagem</th>

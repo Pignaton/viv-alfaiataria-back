@@ -61,12 +61,12 @@ class BlogController extends Controller
             'data_publicacao' => $request->data_publicacao ?: ($request->publicado ? now() : null)
         ]);
 
-        // Upload de imagem de destaque
+        // Upload de imagem
         if ($request->hasFile('imagem_destaque')) {
-            $path = $request->file('imagem_destaque')->store('public/blog');
+            $url = uploadToR2($request->file('imagem_destaque'), 'blog/destaque');
             $post->midias()->create([
                 'tipo' => 'imagem',
-                'url' => Storage::url($path),
+                'url' => $url,
                 'destaque' => true,
                 'ordem' => 0
             ]);
@@ -75,12 +75,14 @@ class BlogController extends Controller
         // Upload de outras mídias
         if ($request->hasFile('midias')) {
             foreach ($request->file('midias') as $key => $midia) {
-                $path = $midia->store('public/blog');
                 $tipo = Str::startsWith($midia->getMimeType(), 'video') ? 'video' : 'imagem';
+                $directory = $tipo === 'video' ? 'blog/videos' : 'blog/imagens';
+
+                $url = uploadToR2($midia, $directory);
 
                 $post->midias()->create([
                     'tipo' => $tipo,
-                    'url' => Storage::url($path),
+                    'url' => $url,
                     'ordem' => $key + 1
                 ]);
             }
@@ -96,8 +98,6 @@ class BlogController extends Controller
     public function show($id)
     {
         $post = PostBlog::with(['usuario', 'midias'])->findOrFail($id);
-        //$post->load(['usuario', 'midias']);
-
         return view('pages.blog.show', compact('post'));
     }
 
@@ -113,7 +113,6 @@ class BlogController extends Controller
         ];
 
         $post = PostBlog::with(['usuario', 'midias'])->findOrFail($id);
-        //$post->load(['usuario', 'midias']);
         return view('pages.blog.edit', compact('post', 'tiposConteudo'));
     }
 
@@ -122,6 +121,7 @@ class BlogController extends Controller
      */
     public function update(Request $request, PostBlog $post)
     {
+
         $request->validate([
             'titulo' => 'required|string|max:120',
             'conteudo' => 'required|string',
@@ -144,45 +144,45 @@ class BlogController extends Controller
             'data_publicacao' => $request->data_publicacao ?: ($request->publicado ? now() : null)
         ]);
 
-        // Remover mídias marcadas para exclusão
+
         if ($request->filled('midias_removidas')) {
             $midiasRemovidas = MidiaBlog::whereIn('id', $request->midias_removidas)->get();
 
             foreach ($midiasRemovidas as $midia) {
-                Storage::delete(str_replace('/storage', 'public', $midia->url));
+                deleteFromR2($midia->url);
                 if ($midia->thumbnail) {
-                    Storage::delete(str_replace('/storage', 'public', $midia->thumbnail));
+                    deleteFromR2($midia->thumbnail);
                 }
                 $midia->delete();
             }
         }
 
-        // Upload de nova imagem de destaque
+        //  imagem de destaque
         if ($request->hasFile('imagem_destaque')) {
-            // Remove a imagem de destaque atual se existir
-            $post->imagemDestaque?->delete();
+            $url = uploadToR2($request->file('imagem_destaque'), 'blog/destaque');
 
-            $path = $request->file('imagem_destaque')->store('public/blog');
-            $post->midias()->create([
+            $midia = new MidiaBlog([
                 'tipo' => 'imagem',
-                'url' => Storage::url($path),
+                'url' => $url,
                 'destaque' => true,
                 'ordem' => 0
             ]);
+
+            $post->midias()->save($midia);
         }
 
-        // novas mídias
+        //novas mídias
         if ($request->hasFile('midias')) {
-            $ultimaOrdem = $post->midias()->max('ordem') ?? 0;
-
             foreach ($request->file('midias') as $key => $midia) {
-                $path = $midia->store('public/blog');
                 $tipo = Str::startsWith($midia->getMimeType(), 'video') ? 'video' : 'imagem';
+                $directory = $tipo === 'video' ? 'blog/videos' : 'blog/imagens';
+
+                $url = uploadToR2($midia, $directory);
 
                 $post->midias()->create([
                     'tipo' => $tipo,
-                    'url' => Storage::url($path),
-                    'ordem' => $ultimaOrdem + $key + 1
+                    'url' => $url,
+                    'ordem' => $key + 1
                 ]);
             }
         }
@@ -196,11 +196,11 @@ class BlogController extends Controller
      */
     public function destroy(PostBlog $post)
     {
-        // Remove midas associadas
+
         foreach ($post->midias as $midia) {
-            Storage::delete(str_replace('/storage', 'public', $midia->url));
+            deleteFromR2($midia->url);
             if ($midia->thumbnail) {
-                Storage::delete(str_replace('/storage', 'public', $midia->thumbnail));
+                deleteFromR2($midia->thumbnail);
             }
         }
 
