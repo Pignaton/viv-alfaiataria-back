@@ -92,7 +92,6 @@ class TecidoController extends Controller
             'preco_promocional' => 'nullable|numeric|min:0',
             'imagem' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
-
         if ($request->hasFile('imagem')) {
             // Remove a imagem antiga caso não seja apadrão
             if (!str_contains($tecido->imagem_url, 'default-fabric.jpg')) {

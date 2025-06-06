@@ -26,7 +26,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth']], 
         ->name('blog.store');
     Route::get('/blog/{id}/edit', [\App\Http\Controllers\BlogController::class, 'edit'])
         ->name('blog.edit');
-    Route::put('/blog/{id}/update', [\App\Http\Controllers\BlogController::class, 'update'])
+    Route::put('/blog/update/{post}', [\App\Http\Controllers\BlogController::class, 'update'])
         ->name('blog.update');
     Route::get('/blog/{id}', [\App\Http\Controllers\BlogController::class, 'show'])
         ->name('blog.show');

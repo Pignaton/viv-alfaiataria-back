@@ -4,7 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 class MidiaBlog extends Model
 {
     use HasFactory;
@@ -24,21 +25,38 @@ class MidiaBlog extends Model
     ];
 
     protected $casts = [
-        'destaque' => 'boolean'
+        'destaque' => 'boolean',
+        'ordem' => 'integer'
     ];
+
+    public static $tiposPermitidos = ['imagem', 'video'];
 
     public function post()
     {
-        return $this->belongsTo(PostBlog::class, 'post_id');
+        return $this->belongsTo(PostBlog::class, 'post_id')->withDefault([
+            'titulo' => 'Post não encontrado'
+        ]);
     }
 
     public function getUrlAttribute($value)
     {
-        return $value ? (Str::startsWith($value, 'http') ? $value : asset('storage/' . $value)) : null;
+        if (empty($value)) {
+            return null;
+        }
+
+        if (Str::startsWith($value, ['http://', 'https://'])) {
+            return $value;
+        }
+
+        return config('filesystems.disks.r2.url').'/'.ltrim($value, '/');
     }
 
     public function getThumbnailAttribute($value)
     {
-        return $value ? (Str::startsWith($value, 'http') ? $value : asset('storage/' . $value)) : null;
+        if (empty($value)) {
+            return null;
+        }
+
+        return $this->getUrlAttribute($value);
     }
 }

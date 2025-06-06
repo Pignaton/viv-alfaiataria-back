@@ -7,6 +7,7 @@ use App\Models\Usuario;
 use App\Models\Cliente;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
@@ -21,6 +22,11 @@ class AuthController extends Controller
             'telefone' => 'nullable|string|max:20',
             'data_nascimento' => 'nullable|date'
         ]);
+
+
+/*Validator::extend('formato_cpf', function ($attribute, $value, $parameters, $validator) {
+    return validaCPF($value); //
+});*/
 
         $usuario = Usuario::create([
             'email' => $request->email,
