@@ -55,7 +55,7 @@ class AuthController extends Controller
             'senha' => 'required'
         ]);
 
-        $usuario = Usuario::where('email', $request->email)->first();
+        $usuario = Usuario::where(['email' => $request->email, 'tipo_usuario' => 'cliente'])->first();
 
         if (!$usuario || !Hash::check($request->senha, $usuario->senha_hash)) {
             return response()->json(['message' => 'Credenciais inválidas'], 401);
