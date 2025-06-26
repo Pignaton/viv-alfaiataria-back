@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\BlogController;
 use App\Http\Controllers\Api\TecidoController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\AddressController;
+use App\Http\Controllers\Api\MetodoPagamentoController;
 
 Route::get('ping', function () {
     return ['pong' => true];
@@ -29,6 +30,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/addresses', [AddressController::class, 'createAddress']);
         Route::put('/addresses/{id}', [AddressController::class, 'updateAddress']);
         Route::delete('/addresses/{id}', [AddressController::class, 'deleteAddress']);
+
+        Route::prefix('metodos-pagamento')->group(function () {
+            Route::get('/{id}', [MetodoPagamentoController::class, 'getMetodoPagamento']);
+            Route::post('/cartao', [MetodoPagamentoController::class, 'saveCartao']);
+            Route::delete('/cartao/{id}', [MetodoPagamentoController::class, 'removeCartao']);
+        });
 
         Route::prefix('medidas')->group(function () {
             //Route::get('/', [UserController::class, 'getMedidas']);
