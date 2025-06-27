@@ -7,7 +7,6 @@ use App\Models\Cliente;
 use Illuminate\Http\Request;
 use App\Models\MetodoPagamento;
 use App\Models\Cartao;
-use Illuminate\Support\Facades\Validator;
 
 class MetodoPagamentoController extends Controller
 {
@@ -47,7 +46,7 @@ class MetodoPagamentoController extends Controller
     public function saveCartao(Request $request)
     {
 
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'tipo' => 'required|in:cartao_credito,cartao_debito',
             'apelido' => 'sometimes|string|max:50',
             'ultimos_quatro_digitos' => 'required|string|size:4',
@@ -57,10 +56,7 @@ class MetodoPagamentoController extends Controller
             'data_validade' => 'required|string|size:5' // MM/AA
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
+        //$cliente = Cliente::where('usuario_id', $request->id)->first();
         $cliente = Cliente::with('usuario')->where('usuario_id', $request->id)->first();
 
         if (!$cliente) {

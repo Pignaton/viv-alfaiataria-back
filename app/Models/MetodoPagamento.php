@@ -9,6 +9,10 @@ class MetodoPagamento extends Model
 {
     use HasFactory;
 
+    const CREATED_AT = 'data_cadastro';
+
+    const UPDATED_AT = 'data_atualizacao';
+
     protected $table = 'metodo_pagamento';
     protected $primaryKey = 'id';
 
@@ -21,7 +25,8 @@ class MetodoPagamento extends Model
 
     protected $casts = [
         'ativo' => 'boolean',
-        'data_cadastro' => 'datetime'
+        'data_cadastro' => 'datetime',
+         'data_atualizacao' => 'datetime'
     ];
 
     const TIPOS = [
