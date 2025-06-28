@@ -55,10 +55,12 @@ class AddressController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }*/
+        $user = Auth::user();
 
         try {
-            //$user = Auth::user();
-            $cliente = Cliente::where('usuario_id', $request->id)->first();
+
+
+            $cliente = Cliente::where('usuario_id', $request->usuario_id)->first();
 
             if (!$cliente) {
                 return response()->json([
@@ -68,7 +70,7 @@ class AddressController extends Controller
             }
 
             $address = Endereco::create([
-                'usuario_id' => $cliente->id,
+                'usuario_id' => $request->usuario_id,
                 'apelido' => $request->apelido,
                 'cep' => $request->cep,
                 'logradouro' => $request->logradouro,

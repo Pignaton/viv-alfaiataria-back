@@ -17,7 +17,7 @@ class MetodoPagamentoController extends Controller
     public function getMetodoPagamento($id)
     {
         //$user = Auth::user();
-        $cliente = Cliente::where('usuario_id', $id)->first();
+        $cliente = Cliente::with('usuario')->where('usuario_id', $id)->first();
 
         if (!$cliente) {
             return response()->json([
@@ -25,9 +25,11 @@ class MetodoPagamentoController extends Controller
                 'message' => 'Dados do cliente não encontrados'
             ], 404);
         }
+        $usuario = $cliente->usuario;
+
 
         $metodo = MetodoPagamento::with('cartao')
-            ->where('usuario_id', $cliente->id)
+            ->where('usuario_id', $usuario->id)
             ->first();
 
         if (!$metodo) {
@@ -47,6 +49,7 @@ class MetodoPagamentoController extends Controller
     {
 
         $request->validate([
+            //'id' => 'required|integer|exists:cliente,usuario_id',
             'tipo' => 'required|in:cartao_credito,cartao_debito',
             'apelido' => 'sometimes|string|max:50',
             'ultimos_quatro_digitos' => 'required|string|size:4',
@@ -57,7 +60,7 @@ class MetodoPagamentoController extends Controller
         ]);
 
         //$cliente = Cliente::where('usuario_id', $request->id)->first();
-        $cliente = Cliente::with('usuario')->where('usuario_id', $request->id)->first();
+        $cliente = Cliente::where('usuario_id', $request->usuario_id)->first();
 
         if (!$cliente) {
             return response()->json([
@@ -67,7 +70,7 @@ class MetodoPagamentoController extends Controller
         }
 
         // Verifica se já existe um metodo para o usuário
-        $metodo = MetodoPagamento::where('usuario_id', $cliente->id)->first();
+        $metodo = MetodoPagamento::where('usuario_id', $request->usuario_id)->first();
 
         // Inicia uma transação para garantir consistência
         return \DB::transaction(function () use ($cliente, $request, $metodo) {
@@ -87,7 +90,7 @@ class MetodoPagamentoController extends Controller
                 ]);
             } else {
                 $metodo = MetodoPagamento::create([
-                    'usuario_id' => $cliente->id,
+                    'usuario_id' => $request->usuario_id,
                     'tipo' => $request->tipo,
                     'apelido' => $request->apelido ?? 'Meu Cartão',
                     'ativo' => true
@@ -126,7 +129,7 @@ class MetodoPagamentoController extends Controller
             ], 404);
         }
 
-        $metodo = MetodoPagamento::where('usuario_id', $cliente->id)->first();
+        $metodo = MetodoPagamento::where('usuario_id', $id)->first();
 
         if (!$metodo) {
             return response()->json(['success' => false, 'message' => 'Nenhum cartão cadastrado'], 404);

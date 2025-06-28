@@ -48,8 +48,8 @@ class BlogController extends Controller
             'tipo_conteudo' => 'required|in:padrao,video,galeria',
             'publicado' => 'boolean',
             'data_publicacao' => 'nullable|date',
-            'imagem_destaque' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'midias.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,mp4,mov,avi|max:5120'
+            'imagem_destaque' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', //2048
+            'midias.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,mp4,mov,avi|max:1048576' //5120
         ]);
 
         $post = PostBlog::create([
@@ -129,8 +129,8 @@ class BlogController extends Controller
             'tipo_conteudo' => 'required|in:padrao,video,galeria',
             'publicado' => 'boolean',
             'data_publicacao' => 'nullable|date',
-            'imagem_destaque' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'midias.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,mp4,mov,avi|max:5120',
+            'imagem_destaque' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', //2048
+            'midias.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,mp4,mov,avi|max:1048576', //5120
             'midias_removidas' => 'nullable|array',
             'midias_removidas.*' => 'exists:midia_blog,id'
         ]);
