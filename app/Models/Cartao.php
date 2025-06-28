@@ -9,6 +9,8 @@ class Cartao extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
     protected $table = 'cartao';
     protected $primaryKey = 'metodo_id';
 
