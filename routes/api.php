@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\TecidoController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\MetodoPagamentoController;
+use App\Http\Controllers\CartController;
 
 Route::get('ping', function () {
     return ['pong' => true];
@@ -48,7 +49,24 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/perfil/{nomePerfil}', [UserController::class, 'getPerfilMedidas']);
         });
     });
+
+//Rotas carrinho
+    Route::prefix('cart')->group(function () {
+        Route::put('/item/{itemId}', [CartController::class, 'updateCartItem']);
+        Route::delete('/item/{itemId}', [CartController::class, 'removeFromCart']);
+        Route::post('/checkout', [CartController::class, 'checkout']);
+    });
+
 });
+
+//públicas carrinho
+Route::prefix('cart')->group(function () {
+    Route::get('/', [CartController::class, 'getCart']);
+    Route::post('/add', [CartController::class, 'addToCart']);
+});
+
+Route::post('/cart/checkout', [CartController::class, 'checkout']);
+Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon']);
 
 Route::get('/blog', [BlogController::class, 'index']);
 Route::get('/blog/{slug}', [BlogController::class, 'show']);

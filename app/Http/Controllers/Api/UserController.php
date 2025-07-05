@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\CamisaPersonalizada;
 use App\Models\Medida;
+use App\Models\Pedido;
 use App\Models\Usuario;
 use App\Models\Cliente;
 use Illuminate\Http\Request;
@@ -330,6 +332,31 @@ class UserController extends Controller
             'nome_perfil' => $nomePerfil,
             'medidas' => $medidas
         ]);
+    }
+
+    public function convertGuestToUser(Request $request)
+    {
+        $cliente = Cliente::where('usuario_id', $request->usuario_id)->first();
+
+        if (!$cliente) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dados do cliente não encontrados'
+            ], 404);
+        }
+        $guestId = $request->cookie('guest_id');
+
+        if ($guestId) {
+            Pedido::where('guest_id', $guestId)
+                ->update(['guest_id' => null, 'usuario_id' => $request->usuario_id]);
+
+            CamisaPersonalizada::where('guest_id', $guestId)
+                ->update(['guest_id' => null, 'usuario_id' => $request->usuario_id]);
+
+            return response()->json(['message' => 'Dados migrados com sucesso']);
+        }
+
+        return response()->json(['message' => 'Nada para migrar']);
     }
 }
 
