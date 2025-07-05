@@ -9,8 +9,14 @@ class Pedido extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
+    const CREATED_AT = 'data_pedido';
+
+    const UPDATED_AT = 'data_atualizacao';
+
     protected $table = 'pedido';
-    protected $primaryKey = 'id';
+    //protected $primaryKey = 'id';
 
     protected $fillable = [
         'codigo',
@@ -26,6 +32,7 @@ class Pedido extends Model
 
     protected $casts = [
         'data_pedido' => 'datetime',
+        'data_atualizacao' => 'datetime',
         'subtotal' => 'decimal:2',
         'desconto' => 'decimal:2',
         'frete' => 'decimal:2',
