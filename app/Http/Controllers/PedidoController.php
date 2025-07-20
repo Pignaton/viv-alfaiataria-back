@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Medida;
 use App\Models\Pedido;
 use App\Models\ItemPedido;
 use App\Models\Pagamento;
@@ -21,8 +22,15 @@ class PedidoController extends Controller
 
     public function show(Pedido $pedido)
     {
-        $pedido->load(['usuario', 'enderecoEntrega', 'itens.tecido', 'itens.camisaPersonalizada']);
-        return view('pages.pedidos.show', compact('pedido'));
+        $pedido->load([
+            'usuario',
+            'itens.tecido',
+            'itens.camisaPersonalizada.tecido'
+        ]);
+
+        $medidasUsuario = Medida::where('usuario_id', $pedido->usuario_id)->get()->groupBy('usuario_id');
+
+        return view('pages.pedidos.show', compact('pedido', 'medidasUsuario'));
     }
 
     public function edit(Pedido $pedido)
@@ -34,8 +42,10 @@ class PedidoController extends Controller
 
     public function update(Request $request, Pedido $pedido)
     {
+        $validStatus = array_keys(Pedido::STATUS);
+
         $request->validate([
-            'status' => 'required|in:' . implode(',', array_keys(Pedido::STATUS)),
+            'status' => 'required|in:' . implode(',', $validStatus),
             'observacoes' => 'nullable|string'
         ]);
 

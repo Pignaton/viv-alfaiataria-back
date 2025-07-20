@@ -57,7 +57,8 @@
                         <td>{{ $pedido->itens->sum('quantidade') }}</td>
                         <td>R$ {{ number_format($pedido->total, 2, ',', '.') }}</td>
                         <td>
-                        <span class="badge badge-{{ $pedido->status === 'cancelado' ? 'danger' : ($pedido->status === 'entregue' ? 'success' : 'warning') }}">
+                        <span
+                            class="badge badge-{{ $pedido->status === 'cancelado' ? 'danger' : ($pedido->status === 'entregue' ? 'success' : 'warning') }}">
                             {{ $pedido->status_formatado }}
                         </span>
                         </td>
@@ -68,10 +69,12 @@
                             <a href="{{ route('admin.pedidos.edit', $pedido->id) }}" class="btn btn-sm btn-primary">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <form action="{{ route('admin.pedidos.destroy', $pedido->id) }}" method="POST" style="display:inline">
+                            <form action="{{ route('admin.pedidos.destroy', $pedido->id) }}" method="POST"
+                                  style="display:inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza?')">
+                                <button type="submit" class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Tem certeza?')">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>

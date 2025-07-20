@@ -34,4 +34,9 @@ class Medida extends Model
     {
         return $this->belongsTo(Usuario::class, 'usuario_id', 'id');
     }
+
+    public function itemPedido()
+    {
+        return $this->belongsTo(ItemPedido::class, 'usuario_id', 'usuario_id');
+    }
 }

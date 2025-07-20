@@ -79,4 +79,20 @@ class Endereco extends Model
             }
         });
     }
+
+    public function enderecoCompleto()
+    {
+        if (!$this->endereco_entrega) return 'N/A';
+
+        $endereco = $this->endereco_entrega;
+        return sprintf(
+            '%s, %s, %s - %s/%s, CEP: %s',
+            $endereco['logradouro'] ?? '',
+            $endereco['numero'] ?? '',
+            $endereco['bairro'] ?? '',
+            $endereco['cidade'] ?? '',
+            $endereco['estado'] ?? '',
+            $endereco['cep'] ?? ''
+        );
+    }
 }

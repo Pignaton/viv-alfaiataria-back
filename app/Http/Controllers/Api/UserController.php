@@ -358,5 +358,76 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Nada para migrar']);
     }
+
+    public function getPurchaseHistory(Request $request, $usuario_id)
+    {
+        try {
+
+            $cliente = Cliente::where('usuario_id', $usuario_id)->first();
+
+            if (!$cliente) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Dados do cliente não encontrados'
+                ], 404);
+            }
+
+            $request->validate([
+                'periodo' => 'sometimes|in:3,6,12,all'
+            ]);
+
+            $periodo = $request->input('periodo', '3'); // Default: últimos 3 meses
+
+            $query = Pedido::with(['itens.camisaPersonalizada.tecido', 'enderecoEntrega'])
+                ->where('usuario_id', $usuario_id)
+                ->where('status', '!=', 'pendente')
+                ->orderBy('data_pedido', 'desc');
+
+            if ($periodo !== 'all') {
+                $query->where('data_pedido', '>=', now()->subMonths($periodo));
+            }
+
+            $pedidos = $query->get()->map(function ($pedido) {
+                return [
+                    'id' => $pedido->id,
+                    'numero' => $pedido->codigo,
+                    'data' => $pedido->data_pedido->format('Y-m-d'),
+                    'status' => $pedido->status,
+                    'total' => $pedido->total,
+                    'metodo_pagamento' => $pedido->metodo_pagamento,
+                    'endereco' => is_string($pedido->endereco_entrega) ? json_decode($pedido->endereco_entrega, true) : $pedido->endereco_entrega,
+                    'itens' => $pedido->itens->map(function ($item) {
+                        return [
+                            'produto' => [
+                                'nome' => $item->camisaPersonalizada ?
+                                    'Camisa Personalizada - ' . $item->camisaPersonalizada->tecido->nome :
+                                    'Produto não disponível',
+                                'imagem' => $item->camisaPersonalizada->tecido->imagem_url ?? null
+                            ],
+                            'quantidade' => $item->quantidade,
+                            'preco_unitario' => $item->preco_unitario,
+                            'subtotal' => $item->quantidade * $item->preco_unitario
+                        ];
+                    })
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $pedidos,
+                'meta' => [
+                    'total_pedidos' => $pedidos->count(),
+                    'periodo' => $periodo === 'all' ? 'Todo o histórico' : "Últimos $periodo meses"
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao recuperar histórico de compras',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
 
