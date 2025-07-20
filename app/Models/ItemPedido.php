@@ -45,4 +45,16 @@ class ItemPedido extends Model
     {
         return $this->preco_unitario * $this->quantidade;
     }
+
+    public function medidas()
+    {
+        return $this->hasManyThrough(
+            Medida::class,
+            User::class,
+            'id',
+            'usuario_id',
+            'usuario_id',
+            'id'
+        );
+    }
 }

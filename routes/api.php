@@ -1,14 +1,14 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BlogController;
+use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\MetodoPagamentoController;
 use App\Http\Controllers\Api\TecidoController;
 use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\Api\AddressController;
-use App\Http\Controllers\Api\MetodoPagamentoController;
-use App\Http\Controllers\CartController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 Route::get('ping', function () {
     return ['pong' => true];
@@ -48,6 +48,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/perfil', [UserController::class, 'savePerfilMedidas']);
             Route::get('/perfil/{nomePerfil}', [UserController::class, 'getPerfilMedidas']);
         });
+
+        Route::get('/purchase-history/{usuario_id}', [UserController::class, 'getPurchaseHistory']);
     });
 
 //Rotas carrinho

@@ -2,6 +2,47 @@
 
 @section('title', 'Gerenciar Pedidos')
 
+@section('style')
+    <style>
+        .measures-container {
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 5px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+
+        .measures-container ul {
+            margin-bottom: 0;
+        }
+        .medidas-container {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+
+        .medidas-container ul {
+            list-style-type: none;
+            padding-left: 15px;
+            margin-bottom: 0;
+        }
+
+        .medidas-container li {
+            padding: 3px 0;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .medidas-container li:last-child {
+            border-bottom: none;
+        }
+    </style>
+@endsection
+
 @section('content_header')
     <div class="col-sm-6">
         <ol class="breadcrumb">
@@ -41,7 +82,8 @@
                                 <tr>
                                     <th>Status:</th>
                                     <td>
-                                    <span class="badge badge-{{ $pedido->status === 'cancelado' ? 'danger' : ($pedido->status === 'entregue' ? 'success' : 'warning') }}">
+                                    <span
+                                        class="badge badge-{{ $pedido->status === 'cancelado' ? 'danger' : ($pedido->status === 'entregue' ? 'success' : 'warning') }}">
                                         {{ $pedido->status_formatado }}
                                     </span>
                                     </td>
@@ -78,17 +120,21 @@
                 </div>
 
                 <div class="col-md-6">
-                    <div class="card">
+                    <div class="card mt-3">
                         <div class="card-header">
                             <h4 class="card-title">Endereço de Entrega</h4>
                         </div>
                         <div class="card-body">
-                            @if($pedido->enderecoEntrega)
-                                <p>{{ $pedido->enderecoEntrega->logradouro }}, {{ $pedido->enderecoEntrega->numero }}</p>
-                                <p>{{ $pedido->enderecoEntrega->bairro }}</p>
-                                <p>{{ $pedido->enderecoEntrega->cidade }}/{{ $pedido->enderecoEntrega->estado }}</p>
-                                <p>CEP: {{ $pedido->enderecoEntrega->cep }}</p>
-                                <p>Complemento: {{ $pedido->enderecoEntrega->complemento ?? 'N/A' }}</p>
+                            @if(!empty($pedido->endereco_entrega))
+                                <p>{{ $pedido->endereco_entrega['logradouro'] }}
+                                    , {{ $pedido->endereco_entrega['numero'] }}</p>
+                                <p>{{ $pedido->endereco_entrega['bairro'] }}</p>
+                                <p>{{ $pedido->endereco_entrega['cidade'] }}
+                                    /{{ $pedido->endereco_entrega['estado'] }}</p>
+                                <p>CEP: {{ $pedido->endereco_entrega['cep'] }}</p>
+                                @if(!empty($pedido->endereco_entrega['complemento']))
+                                    <p>Complemento: {{ $pedido->endereco_entrega['complemento'] }}</p>
+                                @endif
                             @else
                                 <p class="text-muted">Nenhum endereço de entrega registrado</p>
                             @endif
@@ -104,6 +150,7 @@
                                 <thead>
                                 <tr>
                                     <th>Item</th>
+                                    <th>Detalhes</th>
                                     <th>Qtd</th>
                                     <th>Preço Unit.</th>
                                     <th>Total</th>
@@ -119,6 +166,28 @@
                                                 Tecido: {{ $item->tecido->nome_produto }}
                                             @else
                                                 Item #{{ $item->id }}
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($item->camisaPersonalizada)
+                                                <small>
+                                                    <strong>Modelo:</strong> {{ $item->camisaPersonalizada->genero }} - {{ $item->camisaPersonalizada->modelagem }}<br>
+                                                    <strong>Manga:</strong> {{ $item->camisaPersonalizada->manga }}<br>
+                                                    <strong>Tecido:</strong> {{ $item->camisaPersonalizada->tecido->nome_produto ?? 'N/A' }}
+                                                </small>
+                                            @elseif(isset($medidasUsuario[$pedido->usuario_id]) && $medidasUsuario[$pedido->usuario_id]->isNotEmpty())
+                                                <div class="medidas-container">
+                                                    <strong>Medidas Personalizadas:</strong>
+                                                    <ul>
+                                                        @foreach($medidasUsuario[$pedido->usuario_id] as $medida)
+                                                            <li>{{ ucfirst($medida->nome) }}: {{ $medida->valor }} {{ $medida->unidade }}</li>
+                                                        @endforeach
+                                                    </ul>
+                                                </div>
+                                            @elseif($item->tecido)
+                                                <small>Tecido: {{ $item->tecido->nome_produto }}</small>
+                                            @else
+                                                <small>Sem informações detalhadas</small>
                                             @endif
                                         </td>
                                         <td>{{ $item->quantidade }}</td>

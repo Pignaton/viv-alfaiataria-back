@@ -16,7 +16,7 @@ class Pedido extends Model
     const UPDATED_AT = 'data_atualizacao';
 
     protected $table = 'pedido';
-    //protected $primaryKey = 'id';
+    protected $primaryKey = 'id';
 
     protected $fillable = [
         'codigo',
@@ -27,7 +27,12 @@ class Pedido extends Model
         'desconto',
         'frete',
         'total',
-        'observacoes'
+        'observacoes',
+        'guest_id',
+        'metodo_pagamento',
+        'dados_cliente',
+        'endereco_entrega',
+        'dados_pagamento'
     ];
 
     protected $casts = [
@@ -36,7 +41,10 @@ class Pedido extends Model
         'subtotal' => 'decimal:2',
         'desconto' => 'decimal:2',
         'frete' => 'decimal:2',
-        'total' => 'decimal:2'
+        'total' => 'decimal:2',
+        'dados_pagamento' => 'array',
+        'dados_cliente' => 'array',
+        'endereco_entrega' => 'array'
     ];
 
     const STATUS = [
@@ -47,6 +55,7 @@ class Pedido extends Model
         'entregue' => 'Entregue',
         'cancelado' => 'Cancelado'
     ];
+
 
     public function usuario()
     {
@@ -75,11 +84,20 @@ class Pedido extends Model
 
     public function scopeFiltrarPorStatus($query, $status)
     {
-        return $query->where('status', $status);
+        if ($status && in_array($status, array_keys(self::STATUS))) {
+            return $query->where('status', $status);
+        }
+        return $query;
     }
 
     public function pagamentos()
     {
         return $this->hasMany(Pagamento::class, 'pedido_id');
     }
+
+    public function getSubtotalFormatadoAttribute()
+    {
+        return 'R$ ' . number_format($this->subtotal, 2, ',', '.');
+    }
+
 }
