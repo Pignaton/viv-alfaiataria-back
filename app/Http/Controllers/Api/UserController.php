@@ -135,14 +135,43 @@ class UserController extends Controller
         }
     }
 
-    public function getMedidas()
+    public function getMedidas($usuarioId)
     {
-        $user = Auth::user();
-        $medidas = Medida::where('usuario_id', $user->id)
-            ->orderBy('data_registro', 'desc')
-            ->get();
+        try {
+            $medidas = Medida::where('usuario_id', $usuarioId)
+                ->orderBy('data_registro', 'desc')
+                ->get()
+                ->groupBy(function ($item) {
+                    return Carbon::parse($item->data_registro)->format('d/m/Y');
+                });
 
-        return response()->json($medidas);
+
+            $perfis = [];
+            foreach ($medidas as $data => $itens) {
+                $perfis[] = [
+                    'nome_perfil' => 'Perfil ' . count($perfis) + 1,
+                    'data_registro' => $data,
+                    'medidas' => $itens->map(function($item) {
+                        return [
+                            'nome' => $item->nome,
+                            'valor' => $item->valor,
+                            'unidade' => $item->unidade
+                        ];
+                    })->toArray()
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $perfis
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao recuperar medidas',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function getMedida($id)

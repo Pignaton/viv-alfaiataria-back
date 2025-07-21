@@ -17,6 +17,10 @@ Route::get('ping', function () {
 Route::post('/registrar', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/check-reset-token/{token}', [AuthController::class, 'checkResetToken']);
+Route::post('/reset-password/{token}', [AuthController::class, 'resetPassword']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/usuario', function (Request $request) {
@@ -39,7 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
         });
 
         Route::prefix('medidas')->group(function () {
-            //Route::get('/', [UserController::class, 'getMedidas']);
+            Route::get('/{id}', [UserController::class, 'getMedidas']);
             Route::get('/data/{id}', [UserController::class, 'getMedida']);
             Route::post('/{id}', [UserController::class, 'saveMedidas']);
             Route::delete('/{id}', [UserController::class, 'deleteMedida']);
