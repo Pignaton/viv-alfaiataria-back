@@ -21,6 +21,30 @@ Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/check-reset-token/{token}', [AuthController::class, 'checkResetToken']);
 Route::post('/reset-password/{token}', [AuthController::class, 'resetPassword']);
 
+Route::get('/email/verify/{id}/{hash}', function (string $id, string $hash) {
+    $user = \App\Models\Usuario::findOrFail($id);
+
+    if (!hash_equals(sha1($user->email), $hash)) {
+        abort(403, 'Link de verificação inválido');
+    }
+
+    if ($user->email_verificado_em) {
+        return redirect('https://vivalfaiataria.com.br/login?message=Email já verificado');
+    }
+
+    $user->forceFill([
+        'email_verificado_em' => now(),
+        'ativo' => true
+    ])->save();
+
+    return redirect('https://vivalfaiataria.com.br/login?message=Email verificado com sucesso');
+})->name('verification.verify');
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('resend-verification', [AuthController::class, 'resendVerificationEmail']);
+});
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/usuario', function (Request $request) {

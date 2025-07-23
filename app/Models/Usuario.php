@@ -41,7 +41,8 @@ class Usuario extends Authenticatable
         'ativo' => 'boolean',
         'data_criacao' => 'datetime',
         'ultimo_login' => 'datetime',
-        'bloqueado_ate' => 'datetime'
+        'bloqueado_ate' => 'datetime',
+        'email_verificado_em' => 'datetime',
     ];
 
     public function cliente()
