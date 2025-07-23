@@ -14,6 +14,6 @@
 
 <p>Se você não solicitou uma redefinição de senha, nenhuma ação adicional é necessária.</p>
 
-<p>Atenciosamente,<br>Equipe do Sistema</p>
+<p>Atenciosamente,<br>Equipe da VivAlfaitaria</p>
 </body>
 </html>

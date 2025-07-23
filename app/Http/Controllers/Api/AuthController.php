@@ -14,6 +14,10 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\PasswordResetMail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password as PasswordRule;
+use App\Mail\RegistrationConfirmationMail;
+use Illuminate\Support\Facades\URL;
+
+
 
 class AuthController extends Controller
 {
@@ -21,35 +25,50 @@ class AuthController extends Controller
     {
         $request->validate([
             'email' => 'required|email|unique:usuario',
-            'senha' => ['required', Password::min(8)],
+            'senha' => ['required', Password::min(8)->mixedCase()->numbers()],
             'nome_completo' => 'required|string|max:100',
-            'cpf' => 'required|string|max:14|unique:cliente',
+            'cpf' => [
+                'required',
+                'string',
+                'max:14',
+                'unique:cliente',
+                /*function ($attribute, $value, $fail) {
+                    if (!$this->validateCPF($value)) {
+                        $fail('O CPF informado é inválido.');
+                    }
+                },*/
+            ],
             'telefone' => 'nullable|string|max:20',
-            'data_nascimento' => 'nullable|date'
+            'data_nascimento' => [
+                'required',
+                'date',
+                'before_or_equal:' . now()->subYears(18)->format('Y-m-d'),
+            ]
         ]);
 
 
-        /*Validator::extend('formato_cpf', function ($attribute, $value, $parameters, $validator) {
-            return validaCPF($value); //
-        });*/
-
-        $usuario = Usuario::create([
+       $usuario = Usuario::create([
             'email' => $request->email,
             'senha_hash' => Hash::make($request->senha),
-            'tipo_usuario' => 'cliente'
+            'tipo_usuario' => 'cliente',
+            'ativo' => false,
+            'email_verificado_em' => null
         ]);
 
-        Cliente::create([
-            'usuario_id' => $usuario->id,
+        $cliente = $usuario->cliente()->create([
             'nome_completo' => $request->nome_completo,
             'cpf' => $request->cpf,
             'telefone' => $request->telefone,
             'data_nascimento' => $request->data_nascimento
         ]);
 
+        Mail::to($usuario->email)->send(new RegistrationConfirmationMail($usuario));
+
         return response()->json([
-            'message' => 'Usuário registrado com sucesso',
-            'usuario' => $usuario
+            'status' => true,
+            'message' => 'Registro realizado com sucesso. Verifique seu email para ativar sua conta.',
+            'usuario' => $usuario,
+            'cliente' => $cliente
         ], 201);
     }
 
@@ -88,6 +107,27 @@ class AuthController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
         return response()->json(['message' => 'Logout realizado com sucesso']);
+    }
+
+    public function resendVerificationEmail(Request $request)
+    {
+        $request->validate(['email' => 'required|exists:usuario,email']);
+
+        $user = Usuario::where('email', $request->email)->first();
+
+        if ($user->email_verificado_em) {
+            return response()->json([
+                'message' => 'Email já verificado',
+                'verified' => true
+            ]);
+        }
+
+        Mail::to($user->email)->send(new \App\Mail\RegistrationConfirmationMail($user));
+
+        return response()->json([
+            'message' => 'Email de verificação reenviado',
+            'resent' => true
+        ]);
     }
 
     public function forgotPassword(Request $request)
@@ -198,5 +238,26 @@ class AuthController extends Controller
             'email' => $usuario->email,
             'expires_at' => $tokenRecord->expiracao
         ]);
+    }
+
+    private function validateCPF($cpf)
+    {
+        $cpf = preg_replace('/[^0-9]/', '', $cpf);
+
+        if (strlen($cpf) != 11 || preg_match('/(\d)\1{10}/', $cpf)) {
+            return false;
+        }
+
+        for ($t = 9; $t < 11; $t++) {
+            for ($d = 0, $c = 0; $c < $t; $c++) {
+                $d += $cpf[$c] * (($t + 1) - $c);
+            }
+            $d = ((10 * $d) % 11) % 10;
+            if ($cpf[$c] != $d) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
