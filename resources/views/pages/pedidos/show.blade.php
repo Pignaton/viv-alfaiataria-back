@@ -16,6 +16,7 @@
         .measures-container ul {
             margin-bottom: 0;
         }
+
         .medidas-container {
             max-height: 200px;
             overflow-y: auto;
@@ -39,6 +40,26 @@
 
         .medidas-container li:last-child {
             border-bottom: none;
+        }
+        .info-box {
+            box-shadow: none;
+            margin-bottom: 0;
+        }
+        .info-box .info-box-icon {
+            height: 70px;
+            line-height: 70px;
+            font-size: 30px;
+        }
+        .info-box .info-box-content {
+            padding: 10px;
+        }
+        .info-box-text {
+            font-size: 14px;
+            color: #6c757d;
+        }
+        .info-box-number {
+            font-size: 18px;
+            font-weight: bold;
         }
     </style>
 @endsection
@@ -69,6 +90,7 @@
                         <div class="card-header">
                             <h4 class="card-title">Informações do Pedido</h4>
                         </div>
+
                         <div class="card-body">
                             <table class="table table-sm">
                                 <tr>
@@ -83,7 +105,7 @@
                                     <th>Status:</th>
                                     <td>
                                     <span
-                                        class="badge badge-{{ $pedido->status === 'cancelado' ? 'danger' : ($pedido->status === 'entregue' ? 'success' : 'warning') }}">
+                                        class="badge badge-{{badgeStatus($pedido->status)}}">
                                         {{ $pedido->status_formatado }}
                                     </span>
                                     </td>
@@ -117,6 +139,31 @@
                             <p><strong>Email:</strong> {{ $pedido->usuario->email }}</p>
                         </div>
                     </div>
+                    @if($pedido->codigo_rastreio)
+                        <div class="card mt-3">
+                            <div class="card-header">
+                                <h4 class="card-title">Informações de Envio</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="info-box bg-light">
+                                    <span class="info-box-icon bg-info"><i class="fas fa-truck"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Código de Rastreio</span>
+                                        <span class="info-box-number">
+                                            {{ $pedido->codigo_rastreio }}
+                                            <a href="https://www.linkcorreios.com.br/?id={{ $pedido->codigo_rastreio }}"
+                                               target="_blank" class="btn btn-xs btn-default ml-2">
+                                                <i class="fas fa-external-link-alt"></i> Rastrear
+                                            </a>
+                                        </span>
+                                        @if($pedido->data_envio)
+                                            <small>Enviado em: {{ $pedido->data_envio }}</small>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 <div class="col-md-6">
@@ -171,7 +218,8 @@
                                         <td>
                                             @if($item->camisaPersonalizada)
                                                 <small>
-                                                    <strong>Modelo:</strong> {{ $item->camisaPersonalizada->genero }} - {{ $item->camisaPersonalizada->modelagem }}<br>
+                                                    <strong>Modelo:</strong> {{ $item->camisaPersonalizada->genero }}
+                                                    - {{ $item->camisaPersonalizada->modelagem }}<br>
                                                     <strong>Manga:</strong> {{ $item->camisaPersonalizada->manga }}<br>
                                                     <strong>Tecido:</strong> {{ $item->camisaPersonalizada->tecido->nome_produto ?? 'N/A' }}
                                                 </small>
@@ -180,7 +228,8 @@
                                                     <strong>Medidas Personalizadas:</strong>
                                                     <ul>
                                                         @foreach($medidasUsuario[$pedido->usuario_id] as $medida)
-                                                            <li>{{ ucfirst($medida->nome) }}: {{ $medida->valor }} {{ $medida->unidade }}</li>
+                                                            <li>{{ ucfirst($medida->nome) }}
+                                                                : {{ $medida->valor }} {{ $medida->unidade }}</li>
                                                         @endforeach
                                                     </ul>
                                                 </div>

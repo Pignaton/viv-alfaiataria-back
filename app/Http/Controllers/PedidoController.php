@@ -2,12 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\PedidoEnviadoMail;
 use App\Models\Medida;
 use App\Models\Pedido;
 use App\Models\ItemPedido;
 use App\Models\Pagamento;
 use App\Models\Reembolso;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Yajra\DataTables\Facades\DataTables;
+use App\Rules\CodigoRastreio;
+
 
 class PedidoController extends Controller
 {
@@ -46,13 +52,47 @@ class PedidoController extends Controller
 
         $request->validate([
             'status' => 'required|in:' . implode(',', $validStatus),
+            'codigo_rastreio' => [
+                'nullable',
+                'string',
+                'max:13',
+                new CodigoRastreio(),
+                function ($attribute, $value, $fail) use ($request, $pedido) {
+                    if ($request->status === 'enviado' && empty($value)) {
+                        $fail('O código de rastreio é obrigatório quando o status é "enviado".');
+                    }
+                }
+            ],
             'observacoes' => 'nullable|string'
         ]);
 
-        $pedido->update([
+        $updateData = [
             'status' => $request->status,
             'observacoes' => $request->observacoes
-        ]);
+        ];
+
+        if ($request->status === 'enviado' && $request->filled('codigo_rastreio')) {
+            $updateData['codigo_rastreio'] = $request->codigo_rastreio;
+            $updateData['data_envio'] = now();
+
+            if ($pedido->status === 'enviado') {
+
+                try {
+                  Mail::to($pedido->usuario->email)
+                        ->send(new PedidoEnviadoMail($pedido, $pedido->usuario));
+
+                    Log::info("Email de pedido enviado para {$pedido->usuario->email}");
+                } catch (\Exception $e) {
+                    Log::error("Falha ao enviar email: " . $e->getMessage());
+                }
+            }
+        } elseif ($request->status !== 'enviado') {
+            $updateData['codigo_rastreio'] = null;
+            $updateData['data_envio'] = null;
+        }
+
+
+        $pedido->update($updateData);
 
         return redirect()->route('admin.pedidos.show', $pedido->id)
             ->with('success', 'Pedido atualizado com sucesso!');
@@ -77,7 +117,7 @@ class PedidoController extends Controller
 
     public function pagamentos(Pedido $pedido)
     {
-        $pedido->load(['pagamentos' => function($query) {
+        $pedido->load(['pagamentos' => function ($query) {
             $query->with(['pix', 'boleto', 'reembolsos'])->latest('data_criacao');
         }]);
 
@@ -125,5 +165,40 @@ class PedidoController extends Controller
 
         return redirect()->back()
             ->with('success', 'Solicitação de reembolso criada com sucesso!');
+    }
+
+
+    public function datatable(Request $request)
+    {
+        $query = Pedido::with(['usuario', 'usuario.cliente', 'itens'])
+            ->select('pedido.*');
+
+
+        // Filtro por status
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        return DataTables::eloquent($query)
+            ->addColumn('cliente', function (Pedido $pedido) {
+                return $pedido->usuario->cliente->nome_completo ?? null;
+            })
+            ->addColumn('total_itens', function (Pedido $pedido) {
+                return $pedido->itens->sum('quantidade');
+            })
+            ->editColumn('data_pedido', function (Pedido $pedido) {
+                return $pedido->data_pedido->format('d/m/Y H:i');
+            })
+            ->editColumn('total', function (Pedido $pedido) {
+                return 'R$ ' . number_format($pedido->total, 2, ',', '.');
+            })
+            ->editColumn('status', function (Pedido $pedido) {
+                return '<span class="badge badge-' . badgeStatus($pedido->status) . '">' . $pedido->status_formatado . '</span>';
+            })
+            ->addColumn('actions', function (Pedido $pedido) {
+                return view('pages.pedidos.actions', compact('pedido'))->render();
+            })
+            ->rawColumns(['status', 'actions'])
+            ->toJson();
     }
 }

@@ -7,6 +7,7 @@ use App\Models\Cliente;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Yajra\DataTables\Facades\DataTables;
 
 class ClienteController extends Controller
 {
@@ -120,6 +121,41 @@ class ClienteController extends Controller
 
         return redirect()->route('admin.clientes.index')
             ->with('success', 'Cliente removido com sucesso!');
+    }
+
+    public function datatable()
+    {
+        $query = Usuario::with(['cliente', 'enderecos'])
+            ->where('tipo_usuario', 'cliente')
+            ->select('usuario.*');
+
+        return DataTables::eloquent($query)
+            ->addColumn('nome_completo', function(Usuario $usuario) {
+                return $usuario->cliente->nome_completo ?? '';
+            })
+            ->addColumn('cpf', function(Usuario $usuario) {
+                return $usuario->cliente->cpf ?? null;
+            })
+            ->addColumn('telefone', function(Usuario $usuario) {
+                return $usuario->cliente->telefone ?? null;
+            })
+            ->addColumn('enderecos_count', function(Usuario $usuario) {
+                return $usuario->cliente->enderecos->count();
+            })
+            ->addColumn('endereco_principal', function(Usuario $usuario) {
+                return $usuario->cliente->enderecos->where('principal', true)->first() ? true : false;
+            })
+            ->filterColumn('cliente.nome_completo', function($query, $keyword) {
+                $query->whereHas('cliente', function($q) use ($keyword) {
+                    $q->where('nome_completo', 'like', "%{$keyword}%");
+                });
+            })
+            ->filterColumn('cliente.cpf', function($query, $keyword) {
+                $query->whereHas('cliente', function($q) use ($keyword) {
+                    $q->where('cpf', 'like', "%{$keyword}%");
+                });
+            })
+            ->toJson();
     }
 
 }

@@ -7,6 +7,7 @@ use App\Models\MidiaBlog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Yajra\DataTables\Facades\DataTables;
 
 class BlogController extends Controller
 {
@@ -208,5 +209,28 @@ class BlogController extends Controller
 
         return redirect()->route('admin.blog.index')
             ->with('success', 'Post removido com sucesso!');
+    }
+
+    public function datatable()
+    {
+        $query = PostBlog::with(['usuario', 'imagemDestaque'])
+            ->select('post_blog.*');
+
+        return DataTables::eloquent($query)
+            ->addColumn('imagem_url', function(PostBlog $post) {
+                return $post->imagemDestaque->url ?? null;
+            })
+            ->addColumn('status', function(PostBlog $post) {
+                return $post->publicado;
+            })
+            ->filterColumn('usuario.nome', function($query, $keyword) {
+                $query->whereHas('usuario', function($q) use ($keyword) {
+                    $q->where('nome', 'like', "%{$keyword}%");
+                });
+            })
+            ->orderColumn('data_publicacao', function($query, $order) {
+                $query->orderBy('data_publicacao', $order);
+            })
+            ->toJson();
     }
 }

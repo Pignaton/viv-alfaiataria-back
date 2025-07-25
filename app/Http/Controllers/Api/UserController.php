@@ -138,37 +138,16 @@ class UserController extends Controller
     public function getMedidas($usuarioId)
     {
         try {
-            $medidas = Medida::where('usuario_id', $usuarioId)
-                ->orderBy('data_registro', 'desc')
-                ->get()
-                ->groupBy(function ($item) {
-                    return Carbon::parse($item->data_registro)->format('d/m/Y');
-                });
-
-
-            $perfis = [];
-            foreach ($medidas as $data => $itens) {
-                $perfis[] = [
-                    'nome_perfil' => 'Perfil ' . count($perfis) + 1,
-                    'data_registro' => $data,
-                    'medidas' => $itens->map(function($item) {
-                        return [
-                            'nome' => $item->nome,
-                            'valor' => $item->valor,
-                            'unidade' => $item->unidade
-                        ];
-                    })->toArray()
-                ];
-            }
+            $medida = Medida::where('usuario_id', $usuarioId)->get();
 
             return response()->json([
                 'success' => true,
-                'data' => $perfis
+                'data' => $medida ?: null
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erro ao recuperar medidas',
+                'message' => 'Erro ao recuperar medida',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -178,7 +157,9 @@ class UserController extends Controller
     {
         try {
             $medida = Medida::where('usuario_id', $id)
-                ->first();
+                ->orderBy('usuario_id')
+                ->get()
+                ->groupBy('usuario_id');
 
             return response()->json([
                 'success' => true,
@@ -198,54 +179,37 @@ class UserController extends Controller
      */
     public function saveMedidas(Request $request, $id)
     {
-        //$user = Auth::user();
-
-        $data = $request->all();
-
         $request->validate([
-            '*.nome' => 'required|string|max:50',
-            '*.valor' => 'required|numeric|min:0.1|max:999.99',
-            '*.unidade' => 'sometimes|string|max:10'
+            'nome' => ['required', 'string', 'max:50', Rule::in([
+                'colarinho', 'torax', 'cintura', 'quadril',
+                'costas', 'ombro', 'comprimento', 'manga', 'biceps'
+            ])],
+            'valor' => 'required|numeric|min:0.1|max:999.99',
+            'unidade' => 'sometimes|string|in:cm' // Forçar apenas cm
         ]);
 
         try {
-            $cliente = Cliente::where('usuario_id', $id)->first();
-
-            if (!$cliente) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Dados do cliente não encontrados'
-                ], 404);
-            }
-
-            $savedMedidas = [];
-
-            foreach ($data as $medidaData) {
-                $medida = Medida::updateOrCreate(
-                    [
-                        'usuario_id' => $id,
-                        'nome' => $medidaData['nome']
-                    ],
-                    [
-                        'valor' => $medidaData['valor'],
-                        'unidade' => $medidaData['unidade'] ?? 'cm',
-                        'data_registro' => now()
-                    ]
-                );
-
-                $savedMedidas[] = $medida;
-            }
+            $medida = Medida::updateOrCreate(
+                [
+                    'usuario_id' => $id,
+                    'nome' => $request->nome
+                ],
+                [
+                    'valor' => $request->valor,
+                    'unidade' => 'cm', // Forçar cm
+                    'data_registro' => now()
+                ]
+            );
 
             return response()->json([
                 'success' => true,
-                'data' => $savedMedidas,
-                'message' => 'Medidas salvas com sucesso',
-            ], 201);
+                'data' => $medida
+            ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erro ao cadastrar medidas',
+                'message' => 'Erro ao salvar medida',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -284,9 +248,6 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Endpoint para salvar um perfil completo de medidas
-     */
     public function savePerfilMedidas(Request $request, $id)
     {
         $cliente = Cliente::where('usuario_id', $id)->first();
