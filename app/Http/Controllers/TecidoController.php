@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Tecido;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Yajra\DataTables\Facades\DataTables;
 
 class TecidoController extends Controller
 {
@@ -121,5 +122,34 @@ class TecidoController extends Controller
         return redirect()->route('admin.tecidos.index')
             ->with('success', 'Tecido removido com sucesso!');
     }
+
+    public function datatable()
+    {
+        $tecidos = Tecido::query();
+
+        return DataTables::eloquent($tecidos)
+            ->addColumn('actions', function (Tecido $tecido) {
+                return view('pages.tecidos.actions', compact('tecido'))->render();
+            })
+            ->editColumn('data_cadastro', function (Tecido $tecido) {
+                return $tecido->data_cadastro->format('Y-m-d H:i:s');
+            })
+            ->rawColumns(['actions'])
+            ->toJson();
+    }
+
+    /*
+     * public function datatable()
+{
+    return DataTables::eloquent(Tecido::query())
+        ->filter(function ($query) {
+            if (request()->has('search') && request('search')['value']) {
+                $search = request('search')['value'];
+                $query->where('nome_produto', 'like', "%{$search}%")
+                      ->orWhere('composicao', 'like', "%{$search}%");
+            }
+        })
+        ->toJson();
+}*/
 
 }

@@ -23,6 +23,8 @@ class Pedido extends Model
         'usuario_id',
         'endereco_entrega_id',
         'status',
+        'codigo_rastreio',
+        'data_envio',
         'subtotal',
         'desconto',
         'frete',
@@ -33,6 +35,12 @@ class Pedido extends Model
         'dados_cliente',
         'endereco_entrega',
         'dados_pagamento'
+    ];
+
+    protected $dates = [
+        'data_pedido',
+        'data_envio',
+        'data_atualizacao'
     ];
 
     protected $casts = [
@@ -53,7 +61,8 @@ class Pedido extends Model
         'processando' => 'Processando',
         'enviado' => 'Enviado',
         'entregue' => 'Entregue',
-        'cancelado' => 'Cancelado'
+        'cancelado' => 'Cancelado',
+        'aguardando_pagamento' => 'Aguardando Pagamento',
     ];
 
 
@@ -98,6 +107,19 @@ class Pedido extends Model
     public function getSubtotalFormatadoAttribute()
     {
         return 'R$ ' . number_format($this->subtotal, 2, ',', '.');
+    }
+
+    public function getTrackingUrlAttribute()
+    {
+        if (!$this->codigo_rastreio) {
+            return null;
+        }
+        return "https://www.linkcorreios.com.br/?id={$this->codigo_rastreio}";
+    }
+
+    public function podeSerEnviado()
+    {
+        return $this->status === 'pago' || $this->status === 'processando';
     }
 
 }

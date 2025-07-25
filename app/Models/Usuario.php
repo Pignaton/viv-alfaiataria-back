@@ -85,4 +85,24 @@ class Usuario extends Authenticatable
         return $this->hasMany(Endereco::class, 'usuario_id');
     }
 
+    public function pedidos()
+    {
+        return $this->hasMany(Pedido::class, 'usuario_id');
+    }
+
+    public function adminlte_desc() {
+       return $this->getNomeAttribute() ?? 'Administrador';
+    }
+
+    public function adminlte_image()
+    {
+        return '/storage/images/logo_abreviado.png';
+    }
+
+
+    public function adminlte_profile_url()
+    {
+        return 'admin/perfil';
+    }
+
 }

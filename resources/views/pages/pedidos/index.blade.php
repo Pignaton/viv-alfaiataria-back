@@ -21,10 +21,10 @@
                     </button>
                     <div class="dropdown-menu">
                         @foreach(App\Models\Pedido::STATUS as $key => $status)
-                            <a class="dropdown-item" href="{{ route('admin.pedidos.filtrar', $key) }}">{{ $status }}</a>
+                            <a class="dropdown-item filter-status" data-status="{{ $key }}" href="#">{{ $status }}</a>
                         @endforeach
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="{{ route('admin.pedidos.index') }}">Todos os Pedidos</a>
+                        <a class="dropdown-item filter-status" data-status="all" href="#">Todos os Pedidos</a>
                     </div>
                 </div>
             </div>
@@ -36,7 +36,7 @@
                 </div>
             @endif
 
-            <table class="table table-bordered table-hover">
+            <table id="pedidos-table" class="table table-bordered table-hover table-striped">
                 <thead>
                 <tr>
                     <th>Código</th>
@@ -48,45 +48,86 @@
                     <th>Ações</th>
                 </tr>
                 </thead>
-                <tbody>
-                @foreach($pedidos as $pedido)
-                    <tr>
-                        <td>{{ $pedido->codigo }}</td>
-                        <td>{{ $pedido->usuario->nome ?? 'N/A' }}</td>
-                        <td>{{ $pedido->data_pedido_formatada }}</td>
-                        <td>{{ $pedido->itens->sum('quantidade') }}</td>
-                        <td>R$ {{ number_format($pedido->total, 2, ',', '.') }}</td>
-                        <td>
-                        <span
-                            class="badge badge-{{ $pedido->status === 'cancelado' ? 'danger' : ($pedido->status === 'entregue' ? 'success' : 'warning') }}">
-                            {{ $pedido->status_formatado }}
-                        </span>
-                        </td>
-                        <td>
-                            <a href="{{ route('admin.pedidos.show', $pedido->id) }}" class="btn btn-sm btn-info">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            <a href="{{ route('admin.pedidos.edit', $pedido->id) }}" class="btn btn-sm btn-primary">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <form action="{{ route('admin.pedidos.destroy', $pedido->id) }}" method="POST"
-                                  style="display:inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger"
-                                        onclick="return confirm('Tem certeza?')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
-                </tbody>
+                <tbody></tbody>
             </table>
-
-            <div class="d-flex justify-content-center mt-3">
-                {{ $pedidos->links() }}
-            </div>
         </div>
     </div>
-@endsection
+@stop
+
+@section('css')
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css">
+@stop
+
+@section('js')
+<script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.4/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        var table = $('#pedidos-table').DataTable({
+            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{{ route('admin.pedidos.datatable') }}",
+                data: function (d) {
+                    d.status = $('.filter-status.active').data('status') || 'all';
+                }
+            },
+            columns: [
+                { data: 'codigo', name: 'codigo' },
+                {
+                    data: 'cliente',
+                    name: 'cliente',
+                    render: function(data) {
+                        console.log(data);
+                        return data || 'N/A';
+                    }
+                },
+                { data: 'data_pedido', name: 'data_pedido' },
+                {
+                    data: 'itens',
+                    name: 'itens',
+                    render: function(data) {
+                        return data.reduce((sum, item) => sum + item.quantidade, 0);
+                    },
+                    orderable: false
+                },
+                { data: 'total', name: 'total' },
+                { data: 'status', name: 'status' },
+                {
+                    data: 'actions',
+                    name: 'actions',
+                    orderable: false,
+                    searchable: false
+                }
+            ],
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.11.4/i18n/pt_br.json'
+            },
+            dom: '<"top"Bf>rt<"bottom"lip><"clear">',
+            buttons: [
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print"></i> Imprimir',
+                    className: 'btn btn-default',
+                    exportOptions: {
+                        columns: [0, 1, 2, 3, 4, 5]
+                    }
+                }
+            ]
+        });
+
+        // Filtro por status
+        $('.filter-status').click(function(e) {
+            e.preventDefault();
+            $('.filter-status').removeClass('active');
+            $(this).addClass('active');
+            table.ajax.reload();
+        });
+    });
+</script>
+@stop

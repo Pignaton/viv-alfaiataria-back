@@ -98,8 +98,9 @@ Route::prefix('cart')->group(function () {
 Route::post('/cart/checkout', [CartController::class, 'checkout']);
 Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon']);
 
-Route::get('/blog', [BlogController::class, 'index']);
-Route::get('/blog/{slug}', [BlogController::class, 'show']);
+Route::get('/blog/posts', [BlogController::class, 'index']);
+Route::get('/blog/posts/{slug}', [BlogController::class, 'show']);
+Route::get('/blog/posts/latest', [BlogController::class, 'latest']);
 
 Route::prefix('tecidos')->group(function () {
     Route::get('/', [TecidoController::class, 'index']);

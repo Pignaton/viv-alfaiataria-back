@@ -1,12 +1,17 @@
 @extends('adminlte::page')
 
-@section('title', 'Gerenciar Cliente')
+@section('title', 'Gerenciar Tecidos')
 
 @section('content_header')
-    <div class="col-sm-6">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/admin/tecidos">Gerenciar Tecidos</a></li>
-        </ol>
+    <div class="row mb-2">
+        <div class="col-sm-6">
+            <h1 class="m-0">Gerenciar Tecidos</h1>
+        </div>
+        <div class="col-sm-6 text-right">
+            <a href="{{ route('admin.tecidos.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Novo Tecido
+            </a>
+        </div>
     </div>
 @stop
 
@@ -14,73 +19,98 @@
     <div class="card">
         <div class="card-header">
             <h3 class="card-title">Lista de Tecidos</h3>
-            <div class="card-tools">
-                <a href="{{ route('admin.tecidos.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Novo Tecido
-                </a>
-            </div>
         </div>
         <div class="card-body">
-            @if(session('success'))
-                <div class="alert alert-success">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            <table class="table table-responsive table-bordered table-hover" style="width: 100%">
-                <thead class="thead-dark">
+            <table id="tecidos-table" class="table table-bordered table-striped table-hover">
+                <thead>
                 <tr>
                     <th>Imagem</th>
                     <th>Nome</th>
                     <th>Composição</th>
-                    <th>Padrão</th>
                     <th>Preço</th>
+                    <th>Origem</th>
+                    <th>Cadastrado em</th>
                     <th>Ações</th>
                 </tr>
                 </thead>
-                <tbody>
-                @foreach($tecidos as $tecido)
-                    <tr>
-                        <td class="text-center">
-                            <img src="{{ $tecido->imagem_url }}" alt="{{ $tecido->nome_produto }}"
-                                 style="max-width: 60px; max-height: 60px;" class="img-thumbnail">
-                        </td>
-                        <td>{{ $tecido->nome_produto }}</td>
-                        <td>{{ $tecido->composicao }}</td>
-                        <td>{{ $tecido->padrao }}</td>
-                        <td>
-                            @if($tecido->preco_promocional > 0)
-                                <span class="text-danger"><del>R$ {{ number_format($tecido->preco, 2, ',', '.') }}</del></span>
-                                <br>
-                                <span class="text-success">R$ {{ number_format($tecido->preco_promocional, 2, ',', '.') }}</span>
-                            @else
-                                R$ {{ number_format($tecido->preco, 2, ',', '.') }}
-                            @endif
-                        </td>
-                        <td>
-                            <a href="{{ route('admin.tecidos.show', $tecido->id) }}" class="btn btn-sm btn-info" title="Visualizar">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            <a href="{{ route('admin.tecidos.edit', $tecido->id) }}" class="btn btn-sm btn-primary" title="Editar">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <form action="{{ route('admin.tecidos.destroy', $tecido->id) }}" method="POST" style="display:inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger" title="Excluir"
-                                        onclick="return confirm('Tem certeza que deseja excluir este tecido?')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
-                </tbody>
+                <tbody></tbody>
             </table>
-
-            <div class="d-flex justify-content-center mt-3">
-                {{ $tecidos->links() }}
-            </div>
         </div>
     </div>
-@endsection
+@stop
+
+@section('css')
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.4/css/dataTables.bootstrap4.min.css">
+    <style>
+        .img-table-thumb {
+            max-width: 60px;
+            max-height: 60px;
+            border-radius: 4px;
+        }
+    </style>
+@stop
+
+@section('js')
+    <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.4/js/dataTables.bootstrap4.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#tecidos-table').DataTable({
+                processing: true,
+                serverSide: true,
+                order: [[1, 'asc']],
+                responsive: true,
+                ajax: "{{ route('admin.tecidos.datatable') }}",
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.11.4/i18n/pt_br.json'
+                },
+                columns: [
+                    {
+                        data: 'imagem_url',
+                        name: 'imagem_url',
+                        render: function (data) {
+                            return data ?
+                                `<img src="${data}" class="img-table-thumb" alt="Imagem do tecido">` :
+                                '<span class="text-muted">Sem imagem</span>';
+                        },
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'nome_produto',
+                        name: 'nome_produto',
+                        render: function (data, type, row) {
+                            return `<a href="/admin/tecidos/${row.id}">${data}</a>`;
+                        }
+                    },
+                    {data: 'composicao', name: 'composicao'},
+                    {
+                        data: 'preco',
+                        name: 'preco',
+                        render: function (data, type, row) {
+                            if (row.preco_promocional > 0) {
+                                return `<span class="text-danger"><del>R$ ${parseFloat(data).toFixed(2).replace('.', ',')}</del></span><br>
+                                    <span class="text-success">R$ ${parseFloat(row.preco_promocional).toFixed(2).replace('.', ',')}</span>`;
+                            }
+                            return `R$ ${parseFloat(data).toFixed(2).replace('.', ',')}`;
+                        }
+                    },
+                    {data: 'origem', name: 'origem'},
+                    {
+                        data: 'data_cadastro',
+                        name: 'data_cadastro',
+                        render: function (data) {
+                            return new Date(data).toLocaleDateString('pt-BR');
+                        }
+                    },
+                    {
+                        data: 'actions',
+                        name: 'actions',
+                        orderable: false,
+                        searchable: false
+                    },
+                ]
+            });
+        });
+    </script>
+@stop
