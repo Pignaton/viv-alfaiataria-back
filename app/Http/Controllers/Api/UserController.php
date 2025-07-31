@@ -368,7 +368,7 @@ class UserController extends Controller
 
             $periodo = $request->input('periodo', '3'); // Default: últimos 3 meses
 
-            $query = Pedido::with(['itens.camisaPersonalizada.tecido', 'enderecoEntrega'])
+            $query = Pedido::with(['itens.tecido', 'enderecoEntrega'])
                 ->where('usuario_id', $usuario_id)
                 ->where('status', '!=', 'pendente')
                 ->orderBy('data_pedido', 'desc');
@@ -384,15 +384,17 @@ class UserController extends Controller
                     'data' => $pedido->data_pedido->format('Y-m-d'),
                     'status' => $pedido->status,
                     'total' => $pedido->total,
+                    'codigo_rastreio' => $pedido->codigo_rastreio,
+                    'data_envio' => $pedido->data_envio,
                     'metodo_pagamento' => $pedido->metodo_pagamento,
                     'endereco' => is_string($pedido->endereco_entrega) ? json_decode($pedido->endereco_entrega, true) : $pedido->endereco_entrega,
                     'itens' => $pedido->itens->map(function ($item) {
                         return [
                             'produto' => [
-                                'nome' => $item->camisaPersonalizada ?
-                                    'Camisa Personalizada - ' . $item->camisaPersonalizada->tecido->nome :
+                                'nome' => $item->tecido ?
+                                    'Camisa Personalizada - ' . $item->tecido->nome_produto :
                                     'Produto não disponível',
-                                'imagem' => $item->camisaPersonalizada->tecido->imagem_url ?? null
+                                'imagem' => $item->tecido->imagem_url ?? null
                             ],
                             'quantidade' => $item->quantidade,
                             'preco_unitario' => $item->preco_unitario,
