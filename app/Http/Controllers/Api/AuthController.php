@@ -154,7 +154,7 @@ class AuthController extends Controller
             'data_criacao' => now()
         ]);
 
-        $resetLink = 'https://vivalfaiataria.com.br/reset-password/' . $token;
+        $resetLink = 'https://www.vivalfaiataria.com.br/reset-password/' . $token;
 
         Mail::to($usuario->email)->send(new PasswordResetMail($resetLink));
 
