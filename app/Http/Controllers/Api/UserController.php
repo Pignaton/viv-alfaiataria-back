@@ -179,31 +179,75 @@ class UserController extends Controller
      */
     public function saveMedidas(Request $request, $id)
     {
-        $request->validate([
-            'nome' => ['required', 'string', 'max:50', Rule::in([
-                'colarinho', 'torax', 'cintura', 'quadril',
-                'costas', 'ombro', 'comprimento', 'manga', 'biceps'
-            ])],
+        $rules = [
+            '*.nome' => [
+                'required', 'string', 'max:50',
+                Rule::in([
+                    'colarinho', 'torax', 'cintura', 'quadril', 'punho',
+                    'costas', 'ombro', 'comprimento', 'manga', 'biceps'
+                ])
+            ],
+            '*.valor' => 'required|numeric|min:0.1|max:999.99',
+            '*.unidade' => 'sometimes|string|in:cm'
+        ];
+
+        // Validação para objeto único
+        $singleRules = [
+            'nome' => [
+                'required', 'string', 'max:50',
+                Rule::in([
+                    'colarinho', 'torax', 'cintura', 'quadril', 'punho',
+                    'costas', 'ombro', 'comprimento', 'manga', 'biceps'
+                ])
+            ],
             'valor' => 'required|numeric|min:0.1|max:999.99',
-            'unidade' => 'sometimes|string|in:cm' // Forçar apenas cm
-        ]);
+            'unidade' => 'sometimes|string|in:cm'
+        ];
 
         try {
-            $medida = Medida::updateOrCreate(
-                [
-                    'usuario_id' => $id,
-                    'nome' => $request->nome
-                ],
-                [
-                    'valor' => $request->valor,
-                    'unidade' => 'cm', // Forçar cm
-                    'data_registro' => now()
-                ]
-            );
+            $data = $request->all();
+            $salvas = [];
+
+            if (isset($data[0]) && is_array($data[0])) {
+                // É um array de medidas
+                $request->validate($rules);
+
+                foreach ($data as $medida) {
+                    $registro = Medida::updateOrCreate(
+                        [
+                            'usuario_id' => $id,
+                            'nome' => $medida['nome']
+                        ],
+                        [
+                            'valor' => $medida['valor'],
+                            'unidade' => 'cm',
+                            'data_registro' => now()
+                        ]
+                    );
+                    $salvas[] = $registro;
+                }
+            } else {
+                // É um único objeto
+                $request->validate($singleRules);
+
+                $registro = Medida::updateOrCreate(
+                    [
+                        'usuario_id' => $id,
+                        'nome' => $data['nome']
+                    ],
+                    [
+                        'valor' => $data['valor'],
+                        'unidade' => 'cm',
+                        'data_registro' => now()
+                    ]
+                );
+
+                $salvas[] = $registro;
+            }
 
             return response()->json([
                 'success' => true,
-                'data' => $medida
+                'data' => $salvas
             ]);
 
         } catch (\Exception $e) {
@@ -214,6 +258,7 @@ class UserController extends Controller
             ], 500);
         }
     }
+
 
     public function deleteMedida($id)
     {

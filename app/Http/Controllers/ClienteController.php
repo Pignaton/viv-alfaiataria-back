@@ -68,7 +68,7 @@ class ClienteController extends Controller
 
     public function edit($id)
     {
-        $cliente = Usuario::with('cliente')
+        $cliente = Usuario::with(['cliente', 'enderecos'])
             ->where('tipo_usuario', 'cliente')
             ->findOrFail($id);
 
@@ -92,7 +92,7 @@ class ClienteController extends Controller
 
         $usuarioData = [
             'email' => $request->email,
-            'ativo' => $request->ativo ?? $cliente->ativo
+            'ativo' => $request->has('ativo') ? 1 : 0
         ];
 
         if ($request->filled('senha')) {
@@ -105,22 +105,13 @@ class ClienteController extends Controller
         $cliente->update($usuarioData);
 
         $clienteData = $request->only(['nome_completo', 'cpf', 'telefone', 'data_nascimento']);
-        $clienteData['cpf'] = $request->cpf ? preg_replace('/[^0-9]/', '', $request->cpf) : null;
-        $clienteData['telefone'] = $request->telefone ? preg_replace('/[^0-9]/', '', $request->telefone) : null;
+        $clienteData['cpf'] = $request->cpf ? preg_replace('/\D/', '', $request->cpf) : null;
+        $clienteData['telefone'] = $request->telefone ? preg_replace('/\D/', '', $request->telefone) : null;
 
         $cliente->cliente()->update($clienteData);
 
         return redirect()->route('admin.clientes.index')
             ->with('success', 'Cliente atualizado com sucesso!');
-    }
-
-    public function destroy($id)
-    {
-        $cliente = Usuario::where('tipo_usuario', 'cliente')->findOrFail($id);
-        $cliente->delete();
-
-        return redirect()->route('admin.clientes.index')
-            ->with('success', 'Cliente removido com sucesso!');
     }
 
     public function datatable()
