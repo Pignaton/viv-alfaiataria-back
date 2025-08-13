@@ -29,11 +29,11 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth']], 
     // Rotas de Blog
     Route::get('/blog/datatable', [\App\Http\Controllers\BlogController::class, 'datatable'])
         ->name('blog.datatable');
-    Route::get('/blog',  [\App\Http\Controllers\BlogController::class, 'index'])
+    Route::get('/blog', [\App\Http\Controllers\BlogController::class, 'index'])
         ->name('blog.index');
-    Route::get('/blog/create',  [\App\Http\Controllers\BlogController::class, 'create'])
+    Route::get('/blog/create', [\App\Http\Controllers\BlogController::class, 'create'])
         ->name('blog.create');
-    Route::post('/blog/store',  [\App\Http\Controllers\BlogController::class, 'store'])
+    Route::post('/blog/store', [\App\Http\Controllers\BlogController::class, 'store'])
         ->name('blog.store');
     Route::get('/blog/{id}/edit', [\App\Http\Controllers\BlogController::class, 'edit'])
         ->name('blog.edit');
@@ -76,4 +76,25 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth']], 
     // API para busca de CEP
     Route::get('api/buscar-cep', [\App\Http\Controllers\EnderecoController::class, 'buscarCep'])
         ->name('api.buscar-cep');
+
+
+    Route::resource('carousel', \App\Http\Controllers\Configuracao\CarouselController::class)
+        ->except(['show'])
+        ->names([
+            'index' => 'carousel.index',
+            'create' => 'carousel.create',
+            'store' => 'carousel.store',
+            'edit' => 'carousel.edit',
+            'update' => 'carousel.update',
+            'destroy' => 'carousel.destroy'
+        ]);
+
+    Route::get('service', [\App\Http\Controllers\Configuracao\ServiceController::class, 'edit'])->name('service.edit');
+    Route::put('service', [\App\Http\Controllers\Configuracao\ServiceController::class, 'update'])->name('service.update');
+    Route::get('service/create', [\App\Http\Controllers\Configuracao\ServiceController::class, 'create'])->name('service.create');
+    Route::post('service', [\App\Http\Controllers\Configuracao\ServiceController::class, 'store'])->name('service.store');
+    Route::get('service', [\App\Http\Controllers\Configuracao\ServiceController::class, 'edit'])->name('service.edit');
+    Route::put('service', [\App\Http\Controllers\Configuracao\ServiceController::class, 'update'])->name('service.update');
+
+
 });

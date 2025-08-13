@@ -356,16 +356,16 @@ return [
             'text' => 'change_password',
             'url' => 'admin/settings',
             'icon' => 'fas fa-fw fa-lock',
-        ],
+        ],*/
         [
-            'text' => 'multilevel',
+            'text' => 'Configuração',
             'icon' => 'fas fa-fw fa-share',
             'submenu' => [
                 [
-                    'text' => 'level_one',
-                    'url' => '#',
+                    'text' => 'Carousel',
+                    'url' => 'admin/carousel',
                 ],
-                [
+                /*[
                     'text' => 'level_one',
                     'url' => '#',
                     'submenu' => [
@@ -388,13 +388,13 @@ return [
                             ],
                         ],
                     ],
-                ],
+                ],*/
                 [
-                    'text' => 'level_one',
-                    'url' => '#',
+                    'text' => 'Serviços',
+                    'url' => 'admin/service',
                 ],
             ],
-        ],*/
+        ],
     ],
 
     /*

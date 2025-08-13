@@ -49,7 +49,7 @@ class TecidoController extends Controller
         if ($request->hasFile('imagem')) {
             $validated['imagem_url'] = uploadToR2($request->file('imagem'), 'tecidos');
         } else {
-            $validated['imagem_url'] = 'https://api.vivalfaiataria.com.br/storage/images/default-fabric.jpg';
+            $validated['imagem_url'] = 'https://pub-64c93879f2ec4956a0a9e00962589232.r2.dev/default-tissues.png';
         }
 
         Tecido::create($validated);

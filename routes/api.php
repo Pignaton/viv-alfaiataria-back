@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\MetodoPagamentoController;
 use App\Http\Controllers\Api\TecidoController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Configuracao\ServiceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -108,3 +109,19 @@ Route::prefix('tecidos')->group(function () {
     Route::get('/{id}', [TecidoController::class, 'show']);
 });
 
+Route::get('/carousel/items', function() {
+    $items = \App\Models\CarouselImage::activeOrdered()
+        ->get(['id', 'title', 'subtitle', 'media_url', 'media_type', 'alt_text']);
+
+    return response()->json([
+        'success' => true,
+        'data' => $items
+    ]);
+});
+
+Route::get('/service', function() {
+    $content = \App\Models\Service::first();
+    return response()->json(['data' => $content]);
+});
+
+Route::get('/service-preco-image', [ServiceController::class, 'getServicePrecoImage']);
