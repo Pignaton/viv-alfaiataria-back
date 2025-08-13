@@ -6,7 +6,7 @@ use Aws\S3\S3Client;
 if (!function_exists('uploadToR2')) {
     function uploadToR2($file, $directory = 'tecidos')
     {
-        try {
+       // try {
             if (!$file->isValid()) {
                 throw new Exception('Arquivo inválido.');
             }
@@ -23,7 +23,6 @@ if (!function_exists('uploadToR2')) {
                 'visibility' => 'public',
             ]);
 
-
             if (!$uploaded) {
                 throw new Exception('Falha no upload do arquivo para R2.');
             }
@@ -34,11 +33,11 @@ if (!function_exists('uploadToR2')) {
 
             return Storage::disk('cloudflare_r2')->url($fileName);
 
-        } catch (\Exception $e) {
+      /*  } catch (\Exception $e) {
 
             \Log::error('Erro no upload para R2: ' . $e->getMessage());
             throw new Exception('Erro no upload para R2: ' . $e->getMessage());
-        }
+        }*/
     }
 }
 
