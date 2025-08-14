@@ -36,6 +36,7 @@ class RegistrationConfirmationMail extends Mailable
             view: 'emails.registration-confirmation',
             with: [
                 'user' => $this->user,
+                'user_name' => $this->user->cliente,
                 'verificationUrl' => $verificationUrl
             ]
         );
