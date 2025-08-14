@@ -263,6 +263,8 @@ class CartController extends Controller
             'items.*.productId' => 'required|exists:tecido,id',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.price' => 'required|numeric|min:0',
+            'items.*.monograma' => 'nullable|string',
+            'items.*.service' => 'nullable|boolean',
             'guestId' => 'nullable|string',
             'usuario_id' => 'nullable|integer',
         ]);
@@ -285,7 +287,7 @@ class CartController extends Controller
             // 3. Calcular totais
             $this->calculateTotals($pedido, $request->deliveryMethod);
 
-            // 4. Salvar informações do cliente e endereço
+            // 4. Salvar informações do cliente e endereço e dados adicionais
             $this->saveCustomerData($pedido, $request);
 
             // 5. Processar pagamento
@@ -443,6 +445,12 @@ class CartController extends Controller
 
     private function saveCustomerData(Pedido $pedido, $request)
     {
+        $monogramas = collect($request->items)
+            ->pluck('monograma')
+            ->filter()
+            ->values()
+            ->first();
+
         $updateData = [
             'metodo_pagamento' => $request->payment['method'],
             'dados_cliente' => [
@@ -461,6 +469,10 @@ class CartController extends Controller
                 'bairro' => $request->address['neighborhood'],
                 'cidade' => $request->address['city'],
                 'estado' => $request->address['state']
+            ],
+            'dados_adicionais' => [
+                'service' => $request['service'] ? 'Sim' : 'Não',
+                'monograma' => $monogramas,
             ]
         ];
 

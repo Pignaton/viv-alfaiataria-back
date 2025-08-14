@@ -34,7 +34,8 @@ class Pedido extends Model
         'metodo_pagamento',
         'dados_cliente',
         'endereco_entrega',
-        'dados_pagamento'
+        'dados_pagamento',
+        'dados_adicionais'
     ];
 
     protected $dates = [
@@ -52,7 +53,8 @@ class Pedido extends Model
         'total' => 'decimal:2',
         'dados_pagamento' => 'array',
         'dados_cliente' => 'array',
-        'endereco_entrega' => 'array'
+        'endereco_entrega' => 'array',
+        'dados_adicionais' => 'array'
     ];
 
     const STATUS = [
